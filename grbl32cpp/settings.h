@@ -1,22 +1,22 @@
 /*
-  settings.h - eeprom configuration handling 
-  Part of Grbl
+settings.h - eeprom configuration handling
+Part of Grbl
 
-  Copyright (c) 2011-2015 Sungeun K. Jeon
-  Copyright (c) 2009-2011 Simen Svale Skogsrud
-  
-  Grbl is free software: you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation, either version 3 of the License, or
-  (at your option) any later version.
+Copyright (c) 2011-2015 Sungeun K. Jeon
+Copyright (c) 2009-2011 Simen Svale Skogsrud
 
-  Grbl is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
+Grbl is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
 
-  You should have received a copy of the GNU General Public License
-  along with Grbl.  If not, see <http://www.gnu.org/licenses/>.
+Grbl is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with Grbl.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #ifndef settings_h
@@ -81,29 +81,30 @@
 
 // Global persistent settings (Stored from byte EEPROM_ADDR_GLOBAL onwards)
 typedef struct {
-  // Axis settings
-  float steps_per_mm[N_AXIS];
-  float max_rate[N_AXIS];
-  float acceleration[N_AXIS];
-  float max_travel[N_AXIS];
+	// Axis settings
+	float steps_per_mm[N_AXIS];
+	float max_rate[N_AXIS];
+	float acceleration[N_AXIS];
+	float max_travel[N_AXIS];
 
-  // Remaining Grbl settings
-  uint8_t pulse_microseconds;
-  uint8_t step_invert_mask;
-  uint8_t dir_invert_mask;
-  uint8_t stepper_idle_lock_time; // If max value 255, steppers do not disable.
-  uint8_t status_report_mask; // Mask to indicate desired report data.
-  float junction_deviation;
-  float arc_tolerance;
-  
-  uint8_t flags;  // Contains default boolean settings
+	// Remaining Grbl settings
+	uint8_t pulse_microseconds;
+	uint8_t step_invert_mask;
+	uint8_t dir_invert_mask;
+	uint8_t stepper_idle_lock_time; // If max value 255, steppers do not disable.
+	uint8_t status_report_mask; // Mask to indicate desired report data.
+	float junction_deviation;
+	float arc_tolerance;
 
-  uint8_t homing_dir_mask;
-  float homing_feed_rate;
-  float homing_seek_rate;
-  uint16_t homing_debounce_delay;
-  float homing_pulloff;
-  uint8_t laser_power_divisor;
+	uint8_t flags;  // Contains default boolean settings
+
+	uint8_t homing_dir_mask;
+	float homing_feed_rate;
+	float homing_seek_rate;
+	uint16_t homing_debounce_delay;
+	float homing_pulloff;
+	uint8_t laser_power_divisor;
+	uint8_t debug_mode;
 } settings_t;
 extern settings_t settings;
 

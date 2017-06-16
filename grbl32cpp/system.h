@@ -1,21 +1,21 @@
 /*
-  system.h - Header for system level commands and real-time processes
-  Part of Grbl
+system.h - Header for system level commands and real-time processes
+Part of Grbl
 
-  Copyright (c) 2014-2015 Sungeun K. Jeon  
+Copyright (c) 2014-2015 Sungeun K. Jeon
 
-  Grbl is free software: you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation, either version 3 of the License, or
-  (at your option) any later version.
+Grbl is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
 
-  Grbl is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
+Grbl is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
 
-  You should have received a copy of the GNU General Public License
-  along with Grbl.  If not, see <http://www.gnu.org/licenses/>.
+You should have received a copy of the GNU General Public License
+along with Grbl.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #ifndef system_h
@@ -69,17 +69,17 @@
 
 // Define global system variables
 typedef struct {
-  uint8_t abort;                 // System abort flag. Forces exit back to main loop for reset.
-  uint8_t state;                 // Tracks the current state of Grbl.
-  uint8_t suspend;               // System suspend bitflag variable that manages holds, cancels, and safety door.
-  uint8_t soft_limit;            // Tracks soft limit errors for the state machine. (boolean)
-  
-  int32_t position[N_AXIS];      // Real-time machine (aka home) position vector in steps. 
-                                 // NOTE: This may need to be a volatile variable, if problems arise.                             
+	uint8_t abort;                 // System abort flag. Forces exit back to main loop for reset.
+	uint8_t state;                 // Tracks the current state of Grbl.
+	uint8_t suspend;               // System suspend bitflag variable that manages holds, cancels, and safety door.
+	uint8_t soft_limit;            // Tracks soft limit errors for the state machine. (boolean)
 
-  int32_t probe_position[N_AXIS]; // Last probe position in machine coordinates and steps.
-  uint8_t probe_succeeded;        // Tracks if last probing cycle was successful.
-  uint8_t homing_axis_lock;       // Locks axes when limits engage. Used as an axis motion mask in the stepper ISR.
+	int32_t position[N_AXIS];      // Real-time machine (aka home) position vector in steps. 
+	// NOTE: This may need to be a volatile variable, if problems arise.                             
+
+	int32_t probe_position[N_AXIS]; // Last probe position in machine coordinates and steps.
+	uint8_t probe_succeeded;        // Tracks if last probing cycle was successful.
+	uint8_t homing_axis_lock;       // Locks axes when limits engage. Used as an axis motion mask in the stepper ISR.
 } system_t;
 extern system_t sys;
 

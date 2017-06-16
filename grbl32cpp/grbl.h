@@ -22,6 +22,7 @@
 #include "settings.h"
 #include "system.h"
 #include "defaults.h"
+#include "led.h"
 #include "laser.h"
 #include "coolant_control.h"
 #include "eeprom.h"

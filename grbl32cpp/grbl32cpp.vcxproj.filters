@@ -96,12 +96,27 @@
     <ClInclude Include="system.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="laser.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="led.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="cpu_map\cpu_map_ChipKitMax32.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="LiquidCrystal_I2C.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="AT24CX.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="led.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Laser.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

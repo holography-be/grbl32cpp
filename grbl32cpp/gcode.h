@@ -107,14 +107,14 @@
 #define CONTROL_MODE_EXACT_PATH 0 // G61 (Default: Must be zero)
 
 // Modal Group M7: Spindle control
-#define LASER_DISABLE 0 // M5 (Default: Must be zero)
-#define SPINDLE_ENABLE_CW 1 // M3
+#define LASER_POWER_DISABLE 0 // M5 (Default: Must be zero)
+#define LASER_POWER_ENABLE 1 // M3
 #define SPINDLE_ENABLE_CCW 2 // M4
 
 // Modal Group M8: Coolant control
-#define LASER_FAN_DISABLE 0 // M9 (Default: Must be zero)
+#define LASER_DISABLE 0 // M9 (Default: Must be zero)
 #define COOLANT_MIST_ENABLE 1 // M7
-#define LASER_FAN_ENABLE 2 // M8
+#define LASER_ENABLE 2 // M8
 
 // Modal Group G8: Tool length offset
 #define TOOL_LENGTH_OFFSET_CANCEL 0 // G49 (Default: Must be zero)
