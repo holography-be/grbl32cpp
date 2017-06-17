@@ -247,5 +247,15 @@ along with Grbl.  If not, see <http://www.gnu.org/licenses/>.
 #define COOLANT_MIST_ENABLE 1 // M7
 #define COOLANT_FLOOD_ENABLE 2 // M8
 
+// Modal Group M7: Spindle control
+#define LASER_POWER_DISABLE 0 // M5 (Default: Must be zero)
+#define LASER_POWER_ENABLE 1 // M3
+#define SPINDLE_ENABLE_CCW 2 // M4
+
+// Modal Group M8: Coolant control
+#define LASER_DISABLE 0 // M9 (Default: Must be zero)
+#define COOLANT_MIST_ENABLE 1 // M7
+#define LASER_ENABLE 2 // M8 
+
 #define GRBL_PLATFORM "ChipKIT Max32"
 

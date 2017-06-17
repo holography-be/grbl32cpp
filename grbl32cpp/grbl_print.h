@@ -23,6 +23,7 @@ along with Grbl.  If not, see <http://www.gnu.org/licenses/>.
 #define grbl_print_h
 
 #include "grbl.h"
+#include "HardwareSerial.h"
 
 class print {
 private:

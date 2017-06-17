@@ -1,3 +1,5 @@
+char test;
+
 #include "gcode.h"
 
 #define MAX_LINE_NUMBER 9999999 
@@ -14,13 +16,13 @@ parser_block_t gc_block;
 #define FAIL(status) return(status);
 
 
-void gc_init()
+void Cgcode::gc_init()
 {
 	memset(&gc_state, 0, sizeof(parser_state_t));
 
 	// Load default G54 coordinate system.
-	if (!(settings::settings_read_coord_data(gc_state.modal.coord_select, gc_state.coord_system))) {
-		report::status_message(STATUS_SETTING_READ_FAIL);
+	if (!(settings.read_coord_data(gc_state.modal.coord_select, gc_state.coord_system))) {
+		report.status_message(STATUS_SETTING_READ_FAIL);
 	}
 	//printStringln("GC init");
 }
@@ -28,9 +30,9 @@ void gc_init()
 
 // Sets g-code parser position in mm. Input in steps. Called by the system abort and hard
 // limit pull-off routines.
-void gc_sync_position()
+void Cgcode::gc_sync_position()
 {
-	system::convert_array_steps_to_mpos(gc_state.position, sys.position);
+	System.convert_array_steps_to_mpos(gc_state.position, sys.position);
 }
 
 
@@ -48,7 +50,7 @@ static uint8_t gc_check_same_position(float *pos_a, float *pos_b)
 // characters have been removed. In this function, all units and positions are converted and 
 // exported to grbl's internal functions in terms of (mm, mm/min) and absolute machine 
 // coordinates, respectively.
-uint8_t gc_execute_line(char *line)
+uint8_t Cgcode::gc_execute_line(char *line)
 {
 	/* -------------------------------------------------------------------------------------
 	STEP 1: Initialize parser block struct and copy current g-code state modes. The parser
@@ -85,9 +87,9 @@ uint8_t gc_execute_line(char *line)
 	float value;
 	uint8_t int_value = 0;
 	uint16_t mantissa = 0;
-	if (settings::settings.debug_mode == DEBUG_MODE_ON) {
-		printString("line :");
-		printStringln(line);
+	if (settings.settings.debug_mode == DEBUG_MODE_ON) {
+		Serial.print("Lines:");
+		Serial.println(line);
 	}
 	while (line[char_counter] != 0) { // Loop until no more g-code words in line.
 		// Import the next g-code word, expecting a letter followed by a value. Otherwise, error out.
@@ -292,11 +294,11 @@ uint8_t gc_execute_line(char *line)
 #endif
 				case 8:
 					gc_block.modal.coolant = LASER_ENABLE;
-					if (settings::settings.debug_mode == DEBUG_MODE_ON) printStringln("laser on");
+					if (settings.settings.debug_mode == DEBUG_MODE_ON) Serial.println("laser on");
 					break;
 				case 9:
 					gc_block.modal.coolant = LASER_DISABLE;
-					if (settings::settings.debug_mode == DEBUG_MODE_ON) printStringln("laser off");
+					if (settings.settings.debug_mode == DEBUG_MODE_ON) Serial.println("laser off");
 					break;
 				}
 				break;
@@ -332,8 +334,8 @@ uint8_t gc_execute_line(char *line)
 				// case 'Q': // Not supported
 			case 'R': word_bit = WORD_R; gc_block.values.r = value; break;
 			case 'S': word_bit = WORD_S; gc_block.values.s = value;
-				if (settings.debug_mode == DEBUG_MODE_ON) {
-					printStringln("set laser power");
+				if (settings.settings.debug_mode == DEBUG_MODE_ON) {
+					Serial.println("set laser power");
 				}
 				break;
 			case 'T': word_bit = WORD_T; break; // gc.values.t = int_value;
@@ -514,7 +516,7 @@ uint8_t gc_execute_line(char *line)
 	if (bit_istrue(command_words, bit(MODAL_GROUP_G12))) { // Check if called in block
 		if (gc_block.modal.coord_select > N_COORDINATE_SYSTEM) { FAIL(STATUS_GCODE_UNSUPPORTED_COORD_SYS); } // [Greater than N sys]
 		if (gc_state.modal.coord_select != gc_block.modal.coord_select) {
-			if (!(settings_read_coord_data(gc_block.modal.coord_select, coordinate_data))) { FAIL(STATUS_SETTING_READ_FAIL); }
+			if (!(settings.read_coord_data(gc_block.modal.coord_select, coordinate_data))) { FAIL(STATUS_SETTING_READ_FAIL); }
 		}
 	}
 
@@ -547,7 +549,7 @@ uint8_t gc_execute_line(char *line)
 		// Determine coordinate system to change and try to load from EEPROM.
 		if (coord_select > 0) { coord_select--; } // Adjust P1-P6 index to EEPROM coordinate data indexing.
 		else { coord_select = gc_block.modal.coord_select; } // Index P0 as the active coordinate system
-		if (!settings_read_coord_data(coord_select, parameter_data)) { FAIL(STATUS_SETTING_READ_FAIL); } // [EEPROM read fail]
+		if (!settings.read_coord_data(coord_select, parameter_data)) { FAIL(STATUS_SETTING_READ_FAIL); } // [EEPROM read fail]
 
 		// Pre-calculate the coordinate data changes. NOTE: Uses parameter_data since coordinate_data may be in use by G54-59.
 		for (idx = 0; idx<N_AXIS; idx++) { // Axes indices are consistent, so loop may be used.
@@ -618,13 +620,13 @@ uint8_t gc_execute_line(char *line)
 			// [G28 Errors]: Cutter compensation is enabled. 
 			// Retreive G28 go-home position data (in machine coordinates) from EEPROM
 			if (!axis_words) { axis_command = AXIS_COMMAND_NONE; } // Set to none if no intermediate motion.
-			if (!settings_read_coord_data(SETTING_INDEX_G28, parameter_data)) { FAIL(STATUS_SETTING_READ_FAIL); }
+			if (!settings.read_coord_data(SETTING_INDEX_G28, parameter_data)) { FAIL(STATUS_SETTING_READ_FAIL); }
 			break;
 		case NON_MODAL_GO_HOME_1:
 			// [G30 Errors]: Cutter compensation is enabled. 
 			// Retreive G30 go-home position data (in machine coordinates) from EEPROM
 			if (!axis_words) { axis_command = AXIS_COMMAND_NONE; } // Set to none if no intermediate motion.
-			if (!settings_read_coord_data(SETTING_INDEX_G30, parameter_data)) { FAIL(STATUS_SETTING_READ_FAIL); }
+			if (!settings.read_coord_data(SETTING_INDEX_G30, parameter_data)) { FAIL(STATUS_SETTING_READ_FAIL); }
 			break;
 		case NON_MODAL_SET_HOME_0: case NON_MODAL_SET_HOME_1:
 			// [G28.1/30.1 Errors]: Cutter compensation is enabled. 
@@ -838,9 +840,9 @@ uint8_t gc_execute_line(char *line)
 	need to update the state and execute the block according to the order-of-execution.
 	*/
 
-	if (settings.debug_mode == DEBUG_MODE_ON) {
-		printStringln("Execute line");
-		Serial.write((char *)&(gc_block), sizeof(parser_block_t));
+	if (settings.settings.debug_mode == DEBUG_MODE_ON) {
+		Serial.println("Execute line");
+		//serial::write((char *)&(gc_block), sizeof(parser_block_t));
 	}
 
 	// [0. Non-specific/common error-checks and miscellaneous setup]: 
@@ -875,14 +877,14 @@ uint8_t gc_execute_line(char *line)
 
 	// [8. Coolant control ]:  
 	if (gc_state.modal.coolant != gc_block.modal.coolant) {
-		coolant_run(gc_block.modal.coolant);
+		coolant.run(gc_block.modal.coolant);
 		gc_state.modal.coolant = gc_block.modal.coolant;
 	}
 
 	// [9. Enable/disable feed rate or spindle overrides ]: NOT SUPPORTED
 
 	// [10. Dwell ]:
-	if (gc_block.non_modal_command == NON_MODAL_DWELL) { mc_dwell(gc_block.values.p); }
+	if (gc_block.non_modal_command == NON_MODAL_DWELL) { Motion.mc_dwell(gc_block.values.p); }
 
 	// [11. Set active plane ]:
 	gc_state.modal.plane_select = gc_block.modal.plane_select;
@@ -924,7 +926,7 @@ uint8_t gc_execute_line(char *line)
 	// [19. Go to predefined position, Set G10, or Set axis offsets ]:
 	switch (gc_block.non_modal_command) {
 	case NON_MODAL_SET_COORDINATE_DATA:
-		settings_write_coord_data(coord_select, parameter_data);
+		settings.write_coord_data(coord_select, parameter_data);
 		// Update system coordinate system if currently active.
 		if (gc_state.modal.coord_select == coord_select) { memcpy(gc_state.coord_system, parameter_data, sizeof(parameter_data)); }
 		break;
@@ -933,23 +935,23 @@ uint8_t gc_execute_line(char *line)
 		// and absolute and incremental modes.
 		if (axis_command) {
 #ifdef USE_LINE_NUMBERS
-			mc_line(gc_block.values.xyz, -1.0, false, gc_state.line_number);
+			Motion.mc_line(gc_block.values.xyz, -1.0, false, gc_state.line_number);
 #else
-			mc_line(gc_block.values.xyz, -1.0, false);
+			Motion.mc_line(gc_block.values.xyz, -1.0, false);
 #endif
 		}
 #ifdef USE_LINE_NUMBERS
-		mc_line(parameter_data, -1.0, false, gc_state.line_number);
+		Motion.mc_line(parameter_data, -1.0, false, gc_state.line_number);
 #else
-		mc_line(parameter_data, -1.0, false);
+		Motion.mc_line(parameter_data, -1.0, false);
 #endif
 		memcpy(gc_state.position, parameter_data, sizeof(parameter_data));
 		break;
 	case NON_MODAL_SET_HOME_0:
-		settings_write_coord_data(SETTING_INDEX_G28, gc_state.position);
+		settings.write_coord_data(SETTING_INDEX_G28, gc_state.position);
 		break;
 	case NON_MODAL_SET_HOME_1:
-		settings_write_coord_data(SETTING_INDEX_G30, gc_state.position);
+		settings.write_coord_data(SETTING_INDEX_G30, gc_state.position);
 		break;
 	case NON_MODAL_SET_COORDINATE_OFFSET:
 		memcpy(gc_state.coord_offset, gc_block.values.xyz, sizeof(gc_block.values.xyz));
@@ -969,33 +971,33 @@ uint8_t gc_execute_line(char *line)
 			switch (gc_state.modal.motion) {
 			case MOTION_MODE_SEEK:
 #ifdef USE_LINE_NUMBERS
-				mc_line(gc_block.values.xyz, -1.0, false, gc_state.line_number);
+				Motion.mc_line(gc_block.values.xyz, -1.0, false, gc_state.line_number);
 #else
-				mc_line(gc_block.values.xyz, -1.0, false);
+				Motion.mc_line(gc_block.values.xyz, -1.0, false);
 #endif
 				break;
 			case MOTION_MODE_LINEAR:
 #ifdef USE_LINE_NUMBERS
-				mc_line(gc_block.values.xyz, gc_state.feed_rate, gc_state.modal.feed_rate, gc_state.line_number);
+				Motion.mc_line(gc_block.values.xyz, gc_state.feed_rate, gc_state.modal.feed_rate, gc_state.line_number);
 #else
-				mc_line(gc_block.values.xyz, gc_state.feed_rate, gc_state.modal.feed_rate);
+				Motion.mc_line(gc_block.values.xyz, gc_state.feed_rate, gc_state.modal.feed_rate);
 #endif
 				break;
 			case MOTION_MODE_CW_ARC:
 #ifdef USE_LINE_NUMBERS
-				mc_arc(gc_state.position, gc_block.values.xyz, gc_block.values.ijk, gc_block.values.r,
+				Motion.mc_arc(gc_state.position, gc_block.values.xyz, gc_block.values.ijk, gc_block.values.r,
 					gc_state.feed_rate, gc_state.modal.feed_rate, axis_0, axis_1, axis_linear, true, gc_state.line_number);
 #else
-				mc_arc(gc_state.position, gc_block.values.xyz, gc_block.values.ijk, gc_block.values.r,
+				Motion.mc_arc(gc_state.position, gc_block.values.xyz, gc_block.values.ijk, gc_block.values.r,
 					gc_state.feed_rate, gc_state.modal.feed_rate, axis_0, axis_1, axis_linear, true);
 #endif
 				break;
 			case MOTION_MODE_CCW_ARC:
 #ifdef USE_LINE_NUMBERS
-				mc_arc(gc_state.position, gc_block.values.xyz, gc_block.values.ijk, gc_block.values.r,
+				Motion.mc_arc(gc_state.position, gc_block.values.xyz, gc_block.values.ijk, gc_block.values.r,
 					gc_state.feed_rate, gc_state.modal.feed_rate, axis_0, axis_1, axis_linear, false, gc_state.line_number);
 #else
-				mc_arc(gc_state.position, gc_block.values.xyz, gc_block.values.ijk, gc_block.values.r,
+				Motion.mc_arc(gc_state.position, gc_block.values.xyz, gc_block.values.ijk, gc_block.values.r,
 					gc_state.feed_rate, gc_state.modal.feed_rate, axis_0, axis_1, axis_linear, false);
 #endif
 				break;
@@ -1003,30 +1005,30 @@ uint8_t gc_execute_line(char *line)
 				// NOTE: gc_block.values.xyz is returned from mc_probe_cycle with the updated position value. So
 				// upon a successful probing cycle, the machine position and the returned value should be the same.
 #ifdef USE_LINE_NUMBERS
-				mc_probe_cycle(gc_block.values.xyz, gc_state.feed_rate, gc_state.modal.feed_rate, false, false, gc_state.line_number);
+				Motion.mc_probe_cycle(gc_block.values.xyz, gc_state.feed_rate, gc_state.modal.feed_rate, false, false, gc_state.line_number);
 #else
-				mc_probe_cycle(gc_block.values.xyz, gc_state.feed_rate, gc_state.modal.feed_rate, false, false);
+				Motion.mc_probe_cycle(gc_block.values.xyz, gc_state.feed_rate, gc_state.modal.feed_rate, false, false);
 #endif
 				break;
 			case MOTION_MODE_PROBE_TOWARD_NO_ERROR:
 #ifdef USE_LINE_NUMBERS
-				mc_probe_cycle(gc_block.values.xyz, gc_state.feed_rate, gc_state.modal.feed_rate, false, true, gc_state.line_number);
+				Motion.mc_probe_cycle(gc_block.values.xyz, gc_state.feed_rate, gc_state.modal.feed_rate, false, true, gc_state.line_number);
 #else
-				mc_probe_cycle(gc_block.values.xyz, gc_state.feed_rate, gc_state.modal.feed_rate, false, true);
+				Motion.mc_probe_cycle(gc_block.values.xyz, gc_state.feed_rate, gc_state.modal.feed_rate, false, true);
 #endif
 				break;
 			case MOTION_MODE_PROBE_AWAY:
 #ifdef USE_LINE_NUMBERS
-				mc_probe_cycle(gc_block.values.xyz, gc_state.feed_rate, gc_state.modal.feed_rate, true, false, gc_state.line_number);
+				Motion.mc_probe_cycle(gc_block.values.xyz, gc_state.feed_rate, gc_state.modal.feed_rate, true, false, gc_state.line_number);
 #else
-				mc_probe_cycle(gc_block.values.xyz, gc_state.feed_rate, gc_state.modal.feed_rate, true, false);
+				Motion.mc_probe_cycle(gc_block.values.xyz, gc_state.feed_rate, gc_state.modal.feed_rate, true, false);
 #endif
 				break;
 			case MOTION_MODE_PROBE_AWAY_NO_ERROR:
 #ifdef USE_LINE_NUMBERS
-				mc_probe_cycle(gc_block.values.xyz, gc_state.feed_rate, gc_state.modal.feed_rate, true, true, gc_state.line_number);
+				Motion.mc_probe_cycle(gc_block.values.xyz, gc_state.feed_rate, gc_state.modal.feed_rate, true, true, gc_state.line_number);
 #else        
-				mc_probe_cycle(gc_block.values.xyz, gc_state.feed_rate, gc_state.modal.feed_rate, true, true);
+				Motion.mc_probe_cycle(gc_block.values.xyz, gc_state.feed_rate, gc_state.modal.feed_rate, true, true);
 #endif
 			}
 
@@ -1045,7 +1047,7 @@ uint8_t gc_execute_line(char *line)
 		protocol_buffer_synchronize(); // Sync and finish all remaining buffered motions before moving on.
 		if (gc_state.modal.program_flow == PROGRAM_FLOW_PAUSED) {
 			if (sys.state != STATE_CHECK_MODE) {
-				bit_true_atomic(sys_rt_exec_state, EXEC_FEED_HOLD); // Use feed hold for program pause.
+				bit_true_atomic(System.sys_rt_exec_state, EXEC_FEED_HOLD); // Use feed hold for program pause.
 				protocol_execute_realtime(); // Execute suspend.
 			}
 		}
@@ -1066,21 +1068,22 @@ uint8_t gc_execute_line(char *line)
 
 			// Execute coordinate change and spindle/coolant stop.
 			if (sys.state != STATE_CHECK_MODE) {
-				if (!(settings_read_coord_data(gc_state.modal.coord_select, coordinate_data))) { FAIL(STATUS_SETTING_READ_FAIL); }
+				if (!(settings.read_coord_data(gc_state.modal.coord_select, coordinate_data))) { FAIL(STATUS_SETTING_READ_FAIL); }
 				memcpy(gc_state.coord_system, coordinate_data, sizeof(coordinate_data));
-				laser_off();
+				Laser.off();
 			}
 
-			report_feedback_message(MESSAGE_PROGRAM_END);
+			report.feedback_message(MESSAGE_PROGRAM_END);
 		}
 		gc_state.modal.program_flow = PROGRAM_FLOW_RUNNING; // Reset program flow.
 	}
 
 	// TODO: % to denote start of program.
 
-	if (settings.debug_mode == DEBUG_MODE_ON) {
-		printStringln("Execute line");
-		Serial.write((char *)&(gc_block), sizeof(parser_block_t));
+	if (settings.settings.debug_mode == DEBUG_MODE_ON) {
+		//print::Stringln("Execute line");
+//    Serial.write("");
+		//serial::write((char *)&(gc_block), sizeof(parser_block_t));
 	}
 
 	return(STATUS_OK);

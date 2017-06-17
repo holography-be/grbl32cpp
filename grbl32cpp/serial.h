@@ -22,7 +22,7 @@
 #ifndef serial_h
 #define serial_h
 
-
+#include "grbl.h"
 
 #ifndef RX_BUFFER_SIZE
   #define RX_BUFFER_SIZE 128
@@ -44,22 +44,35 @@
   #define XON_CHAR 0x11
 #endif
 
-void serial_init(HardwareSerial __serial);
+class serial {
+private:
+public:
+
+	virtual void init();
 
 // Writes one byte to the TX serial buffer. Called by main program.
-void serial_write(uint8_t data);
+	virtual void write(uint8_t);
+
+  virtual void write(uint8_t *data);
+
+  virtual void write(char *buffer);
+
+	virtual void write(uint8_t *buffer, size_t size);
 
 // Fetches the first byte in the serial read buffer. Called by main program.
-uint8_t serial_read();
+	virtual uint8_t read();
 
 // Reset and empty data in read buffer. Used by e-stop and reset.
-void serial_reset_read_buffer();
+	virtual void reset_read_buffer();
 
 // Returns the number of bytes used in the RX serial buffer.
-uint8_t serial_get_rx_buffer_count();
+	virtual uint8_t get_rx_buffer_count();
 
 // Returns the number of bytes used in the TX serial buffer.
 // NOTE: Not used except for debugging and ensuring no TX bottlenecks.
-uint8_t serial_get_tx_buffer_count();
+	virtual uint8_t get_tx_buffer_count();
+};
+
+
 
 #endif

@@ -92,9 +92,6 @@
       <FileType>CppCode</FileType>
     </ClInclude>
     <ClInclude Include="cpu_map\cpu_map_ChipKitMax32.h" />
-    <ClInclude Include="cpu_map_ChipKitMax32.h">
-      <FileType>CppCode</FileType>
-    </ClInclude>
     <ClInclude Include="defaults.h">
       <FileType>CppCode</FileType>
     </ClInclude>
@@ -111,7 +108,6 @@
     <ClInclude Include="grbl.h">
       <FileType>CppCode</FileType>
     </ClInclude>
-    <ClInclude Include="grbl_print.h" />
     <ClInclude Include="initexternal.h">
       <FileType>CppCode</FileType>
     </ClInclude>
@@ -168,11 +164,14 @@
     <ClCompile Include="coolant_control.cpp" />
     <ClCompile Include="eeprom.cpp" />
     <ClCompile Include="gcode.cpp" />
-    <ClCompile Include="grbl_print.cpp" />
     <ClCompile Include="Laser.cpp" />
     <ClCompile Include="led.cpp" />
     <ClCompile Include="limits.cpp" />
+    <ClCompile Include="motion_control.cpp" />
+    <ClCompile Include="planner.cpp" />
+    <ClCompile Include="probe.cpp" />
     <ClCompile Include="report.cpp" />
+    <ClCompile Include="serial.cpp" />
     <ClCompile Include="settings.cpp" />
     <ClCompile Include="system.cpp" />
   </ItemGroup>

@@ -23,15 +23,16 @@ along with Grbl.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "grbl.h"
 
-class coolant {
+class Ccoolant {
 private:
 public:
-	static void init();
-	static void stop();
-	static void set_state(uint8_t mode);
-	static void run(uint8_t mode);
+	void init();
+	void stop();
+	void set_state(uint8_t mode);
+	void run(uint8_t mode);
 };
 
+extern Ccoolant coolant;
 
 
 #endif

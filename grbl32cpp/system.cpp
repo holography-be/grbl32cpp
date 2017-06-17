@@ -1,6 +1,6 @@
 #include "system.h"
 
-void init()
+void System::init()
 {
 	
 	/*
@@ -70,17 +70,17 @@ void init()
 
 
 // Executes user startup script, if stored.
-void execute_startup(char *line)
+void System::execute_startup(char *line)
 {
 	uint8_t n;
 	for (n = 0; n < N_STARTUP_LINE; n++) {
-		if (!(settings::settings_read_startup_line(n, line))) {
-			report::report_status_message(STATUS_SETTING_READ_FAIL);
+		if (!(settings.settings_read_startup_line(n, line))) {
+			report.status_message(STATUS_SETTING_READ_FAIL);
 		}
 		else {
 			if (line[0] != 0) {
 				printString(line); // Echo startup line to indicate execution.
-				report::report_status_message(gc_execute_line(line));
+				report.status_message(gc_execute_line(line));
 			}
 		}
 	}
@@ -95,23 +95,23 @@ void execute_startup(char *line)
 // the lines that are processed afterward, not necessarily real-time during a cycle, 
 // since there are motions already stored in the buffer. However, this 'lag' should not
 // be an issue, since these commands are not typically used during a cycle.
-uint8_t execute_line(char *line)
+uint8_t System::execute_line(char *line)
 {
 	uint8_t char_counter = 1;
 	uint8_t helper_var = 0; // Helper variable
 	float parameter, value;
 	switch (line[char_counter]) {
-	case 0: report::report_grbl_help(); break;
+	case 0: report.grbl_help(); break;
 	case '$': case 'G': case 'C': case 'X':
 		if (line[(char_counter + 1)] != 0) { return(STATUS_INVALID_STATEMENT); }
 		switch (line[char_counter]) {
 		case '$': // Prints Grbl settings
 			if (sys.state & (STATE_CYCLE | STATE_HOLD)) { return(STATUS_IDLE_ERROR); } // Block during cycle. Takes too long to print.
-			else { report::report_grbl_settings(); }
+			else { report.grbl_settings(); }
 			break;
 		case 'G': // Prints gcode parser state
 			// TODO: Move this to realtime commands for GUIs to request this data during suspend-state.
-			report::report_gcode_modes();
+			report.gcode_modes();
 			break;
 		case 'C': // Set check g-code mode [IDLE/CHECK]
 			// Perform reset when toggling off. Check g-code mode should only work if Grbl
@@ -119,17 +119,17 @@ uint8_t execute_line(char *line)
 			// simple and consistent.
 			if (sys.state == STATE_CHECK_MODE) {
 				mc_reset();
-				report::report_feedback_message(MESSAGE_DISABLED);
+				report.report_feedback_message(MESSAGE_DISABLED);
 			}
 			else {
 				if (sys.state) { return(STATUS_IDLE_ERROR); } // Requires no alarm mode.
 				sys.state = STATE_CHECK_MODE;
-				report::report_feedback_message(MESSAGE_ENABLED);
+				report.report_feedback_message(MESSAGE_ENABLED);
 			}
 			break;
 		case 'X': // Disable alarm lock [ALARM]
 			if (sys.state == STATE_ALARM) {
-				report::report_feedback_message(MESSAGE_ALARM_UNLOCK);
+				report.report_feedback_message(MESSAGE_ALARM_UNLOCK);
 				sys.state = STATE_IDLE;
 				// Don't run startup script. Prevents stored moves in startup from causing accidents.
 				//if (system_check_safety_door_ajar()) { // Check safety door switch before returning.
@@ -160,7 +160,7 @@ uint8_t execute_line(char *line)
 		switch (line[char_counter]) {
 		case '#': // Print Grbl NGC parameters
 			if (line[++char_counter] != 0) { return(STATUS_INVALID_STATEMENT); }
-			else { report::report_ngc_parameters(); }
+			else { report.report_ngc_parameters(); }
 			break;
 		case 'H': // Perform homing cycle [IDLE/ALARM]
 			if (bit_istrue(settings.flags, BITFLAG_HOMING_ENABLE)) {
@@ -185,8 +185,8 @@ uint8_t execute_line(char *line)
 			break;
 		case 'I': // Print or store build info. [IDLE/ALARM]
 			if (line[++char_counter] == 0) {
-				settings::settings_read_build_info(line);
-				report::report_build_info(line);
+				settings.read_build_info(line);
+				report.build_info(line);
 			}
 			else { // Store startup line [IDLE/ALARM]
 				if (line[char_counter++] != '=') { return(STATUS_INVALID_STATEMENT); }
@@ -194,7 +194,7 @@ uint8_t execute_line(char *line)
 				do {
 					line[char_counter - helper_var] = line[char_counter];
 				} while (line[char_counter++] != 0);
-				settings::settings_store_build_info(line);
+				settings.store_build_info(line);
 			}
 			break;
 		case 'R': // Restore defaults [IDLE/ALARM]
@@ -203,22 +203,22 @@ uint8_t execute_line(char *line)
 			if (line[++char_counter] != '=') { return(STATUS_INVALID_STATEMENT); }
 			if (line[char_counter + 2] != 0) { return(STATUS_INVALID_STATEMENT); }
 			switch (line[++char_counter]) {
-			case '$': settings::settings_restore(SETTINGS_RESTORE_DEFAULTS); break;
-			case '#': settings::settings_restore(SETTINGS_RESTORE_PARAMETERS); break;
-			case '*': settings::settings_restore(SETTINGS_RESTORE_ALL); break;
+			case '$': settings.restore(SETTINGS_RESTORE_DEFAULTS); break;
+			case '#': settings.restore(SETTINGS_RESTORE_PARAMETERS); break;
+			case '*': settings.restore(SETTINGS_RESTORE_ALL); break;
 			default: return(STATUS_INVALID_STATEMENT);
 			}
-			report::report_feedback_message(MESSAGE_RESTORE_DEFAULTS);
+			report.feedback_message(MESSAGE_RESTORE_DEFAULTS);
 			mc_reset(); // Force reset to ensure settings are initialized correctly.
 			break;
 		case 'N': // Startup lines. [IDLE/ALARM]
 			if (line[++char_counter] == 0) { // Print startup lines
 				for (helper_var = 0; helper_var < N_STARTUP_LINE; helper_var++) {
-					if (!(settings::settings_read_startup_line(helper_var, line))) {
-						report::report_status_message(STATUS_SETTING_READ_FAIL);
+					if (!(settings.read_startup_line(helper_var, line))) {
+						report.status_message(STATUS_SETTING_READ_FAIL);
 					}
 					else {
-						report::report_startup_line(helper_var, line);
+						report.startup_line(helper_var, line);
 					}
 				}
 				break;
@@ -242,13 +242,13 @@ uint8_t execute_line(char *line)
 				if (helper_var) { return(helper_var); }
 				else {
 					helper_var = trunc(parameter); // Set helper_var to int value of parameter
-					settings::settings_store_startup_line(helper_var, line);
+					settings.store_startup_line(helper_var, line);
 				}
 			}
 			else { // Store global setting.
 				if (!read_float(line, &char_counter, &value)) { return(STATUS_BAD_NUMBER_FORMAT); }
 				if ((line[char_counter] != 0) || (parameter > 255)) { return(STATUS_INVALID_STATEMENT); }
-				return(settings::settings_store_global_setting((uint8_t)parameter, value));
+				return(settings.store_global_setting((uint8_t)parameter, value));
 			}
 		}
 	}
@@ -259,7 +259,7 @@ uint8_t execute_line(char *line)
 // Returns machine position of axis 'idx'. Must be sent a 'step' array.
 // NOTE: If motor steps and machine position are not in the same coordinate frame, this function
 //   serves as a central place to compute the transformation.
-float convert_axis_steps_to_mpos(int32_t *steps, uint8_t idx)
+float System::convert_axis_steps_to_mpos(int32_t *steps, uint8_t idx)
 {
 	float pos;
 #ifdef COREXY
@@ -279,7 +279,7 @@ float convert_axis_steps_to_mpos(int32_t *steps, uint8_t idx)
 }
 
 
-void convert_array_steps_to_mpos(float *position, int32_t *steps)
+void System::convert_array_steps_to_mpos(float *position, int32_t *steps)
 {
 	uint8_t idx;
 	for (idx = 0; idx<N_AXIS; idx++) {

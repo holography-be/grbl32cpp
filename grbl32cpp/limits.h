@@ -26,26 +26,27 @@
 
 #include "grbl.h"
 
-class limits {
+class Climits {
 private:
 
 public:
 	// Initialize the limits module
-	static void init();
+	void init();
 
 	// Disables hard limits.
-	static void disable();
+	void disable();
 
 	// Returns limit state as a bit-wise uint8 variable.
-	static uint8_t get_state();
+	uint8_t get_state();
 
 	// Perform one portion of the homing cycle based on the input settings.
-	static void go_home(uint8_t cycle_mask);
+	void go_home(uint8_t cycle_mask);
 
 	// Check for soft limit violations
-	static void soft_check(float *target);
+	void soft_check(float *target);
 
 };
 
+extern Climits Limits;
 
 #endif

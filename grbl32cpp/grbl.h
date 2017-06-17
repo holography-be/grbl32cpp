@@ -32,7 +32,7 @@
 #include "limits.h"	
 #include "motion_control.h"
 #include "planner.h"
-#include "grbl_print.h"
+//#include "grbl_print.h"
 #include "probe.h"
 #include "protocol.h"
 #include "report.h"

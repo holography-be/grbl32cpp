@@ -1,36 +1,36 @@
 #include "coolant_control.h"
 
 
-void init()
+void Ccoolant::init()
 {
 	LASER_ON_PORT->TRISxCLR.w = LASER_ON_MASK;
 	LASER_ON_PORT->ODCxCLR.w = LASER_ON_MASK;
 	LASER_FAN_PORT->TRISxCLR.w = LASER_FAN_MASK;
 	LASER_FAN_PORT->ODCxCLR.w = LASER_FAN_MASK;
-	coolant::stop();
+	stop();
 	//printStringln("Laser init");
 }
 
-void stop()
+void Ccoolant::stop()
 {
 	//LASER_ON_PORT->LATxCLR.w = LASER_ON_MASK;
 	//LASER_FAN_PORT->LATxCLR.w = LASER_FAN_MASK;
-	laser::off();
+	Laser.off();
 }
 
-void set_state(uint8_t mode)
+void Ccoolant::set_state(uint8_t mode)
 {
 	if (mode == LASER_ENABLE) {
 		//LASER_ON_PORT->LATxSET.w = LASER_ON_MASK;
 		//LASER_FAN_PORT->LATxSET.w = LASER_FAN_MASK;
-		laser::on();
+		Laser.on();
 	}
 	else {
 		stop();
 	}
 }
 
-void run(uint8_t mode)
+void Ccoolant::run(uint8_t mode)
 {
 	if (sys.state == STATE_CHECK_MODE) { return; }
 	// laser fan must be on immediately

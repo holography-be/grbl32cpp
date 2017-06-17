@@ -5,17 +5,18 @@
 
 #include "grbl.h"
 
-class led {
+class Cled {
 	private:
 
 	public:
-		static void init();
-		static void on(uint32_t led);
-		static void off(uint32_t led);
-		static void toggle(uint32_t led);
+		void init();
+		void on(uint32_t led);
+		void off(uint32_t led);
+		void toggle(uint32_t led);
 
 };
 
+extern Cled Led;
 
 #endif
 

@@ -1,38 +1,38 @@
 #include "settings.h"
 
 // Method to store startup lines into EEPROM
-void store_startup_line(uint8_t n, char *line)
+void Csettings::store_startup_line(uint8_t n, char *line)
 {
 	uint32_t addr = n*(LINE_BUFFER_SIZE + 1) + EEPROM_ADDR_STARTUP_BLOCK;
-	eeprom::memcpy_to_eeprom_with_checksum(addr, (char*)line, LINE_BUFFER_SIZE);
+	eeprom.memcpy_to_eeprom_with_checksum(addr, (char*)line, LINE_BUFFER_SIZE);
 }
 
 
 // Method to store build info into EEPROM
-void store_build_info(char *line)
+void Csettings::store_build_info(char *line)
 {
-	eeprom::memcpy_to_eeprom_with_checksum(EEPROM_ADDR_BUILD_INFO, (char*)line, LINE_BUFFER_SIZE);
+	eeprom.memcpy_to_eeprom_with_checksum(EEPROM_ADDR_BUILD_INFO, (char*)line, LINE_BUFFER_SIZE);
 }
 
 
 // Method to store coord data parameters into EEPROM
-void write_coord_data(uint8_t coord_select, float *coord_data)
+void Csettings::write_coord_data(uint8_t coord_select, float *coord_data)
 {
 	uint32_t addr = coord_select*(sizeof(float)*N_AXIS + 1) + EEPROM_ADDR_PARAMETERS;
-	eeprom::memcpy_to_eeprom_with_checksum(addr, (char*)coord_data, sizeof(float)*N_AXIS);
+	eeprom.memcpy_to_eeprom_with_checksum(addr, (char*)coord_data, sizeof(float)*N_AXIS);
 }
 
 
 // Method to store Grbl global settings struct and version number into EEPROM
-void global_settings()
+void Csettings::global_settings()
 {
 	//eeprom_put_char(0, SETTINGS_VERSION);
-	eeprom::memcpy_to_eeprom_with_checksum(EEPROM_ADDR_GLOBAL, (char*)&settings, sizeof(settings_t));
+	eeprom.memcpy_to_eeprom_with_checksum(EEPROM_ADDR_GLOBAL, (char*)&settings, sizeof(settings_t));
 }
 
 
 // Method to restore EEPROM-saved Grbl global settings back to defaults. 
-void restore(uint8_t restore_flag) {
+void Csettings::restore(uint8_t restore_flag) {
 	if (restore_flag & SETTINGS_RESTORE_DEFAULTS) {
 		settings.pulse_microseconds = DEFAULT_STEP_PULSE_MICROSECONDS;
 		settings.stepper_idle_lock_time = DEFAULT_STEPPER_IDLE_LOCK_TIME;
@@ -81,25 +81,25 @@ void restore(uint8_t restore_flag) {
 
 	if (restore_flag & SETTINGS_RESTORE_STARTUP_LINES) {
 #if N_STARTUP_LINE > 0
-		eeprom::eeprom_put_char(EEPROM_ADDR_STARTUP_BLOCK, 0);
+		eeprom.eeprom_put_char(EEPROM_ADDR_STARTUP_BLOCK, 0);
 #endif
 #if N_STARTUP_LINE > 1
-		eeprom::eeprom_put_char(EEPROM_ADDR_STARTUP_BLOCK + (LINE_BUFFER_SIZE + 1), 0);
+		eeprom.eeprom_put_char(EEPROM_ADDR_STARTUP_BLOCK + (LINE_BUFFER_SIZE + 1), 0);
 #endif
 	}
 
-	if (restore_flag & SETTINGS_RESTORE_BUILD_INFO) { eeprom::eeprom_put_char(EEPROM_ADDR_BUILD_INFO, 0); }
+	if (restore_flag & SETTINGS_RESTORE_BUILD_INFO) { eeprom.eeprom_put_char(EEPROM_ADDR_BUILD_INFO, 0); }
 }
 
 
 // Reads startup line from EEPROM. Updated pointed line string data.
-uint8_t read_startup_line(uint8_t n, char *line)
+uint8_t Csettings::read_startup_line(uint8_t n, char *line)
 {
 	uint32_t addr = n*(LINE_BUFFER_SIZE + 1) + EEPROM_ADDR_STARTUP_BLOCK;
-	if (!(eeprom::memcpy_from_eeprom_with_checksum((char*)line, addr, LINE_BUFFER_SIZE))) {
+	if (!(eeprom.memcpy_from_eeprom_with_checksum((char*)line, addr, LINE_BUFFER_SIZE))) {
 		// Reset line with default value
 		line[0] = 0; // Empty line
-		settings_store_startup_line(n, line);
+		this.store_startup_line(n, line);
 		return(false);
 	}
 	return(true);
@@ -107,12 +107,12 @@ uint8_t read_startup_line(uint8_t n, char *line)
 
 
 // Reads startup line from EEPROM. Updated pointed line string data.
-uint8_t read_build_info(char *line)
+uint8_t Csettings::read_build_info(char *line)
 {
-	if (!(eeprom::memcpy_from_eeprom_with_checksum((char*)line, EEPROM_ADDR_BUILD_INFO, LINE_BUFFER_SIZE))) {
+	if (!(eeprom.memcpy_from_eeprom_with_checksum((char*)line, EEPROM_ADDR_BUILD_INFO, LINE_BUFFER_SIZE))) {
 		// Reset line with default value
 		line[0] = 0; // Empty line
-		settings_store_build_info(line);
+		this.store_build_info(line);
 		return(false);
 	}
 	return(true);
@@ -120,13 +120,13 @@ uint8_t read_build_info(char *line)
 
 
 // Read selected coordinate data from EEPROM. Updates pointed coord_data value.
-uint8_t read_coord_data(uint8_t coord_select, float *coord_data)
+uint8_t Csettings::read_coord_data(uint8_t coord_select, float *coord_data)
 {
 	uint32_t addr = coord_select*(sizeof(float)*N_AXIS + 1) + EEPROM_ADDR_PARAMETERS;
-	if (!(eeprom::memcpy_from_eeprom_with_checksum((char*)coord_data, addr, sizeof(float)*N_AXIS))) {
+	if (!(eeprom.memcpy_from_eeprom_with_checksum((char*)coord_data, addr, sizeof(float)*N_AXIS))) {
 		// Reset with default zero vector
 		clear_vector_float(coord_data);
-		settings_write_coord_data(coord_select, coord_data);
+		this.write_coord_data(coord_select, coord_data);
 		return(false);
 	}
 	return(true);
@@ -134,15 +134,15 @@ uint8_t read_coord_data(uint8_t coord_select, float *coord_data)
 
 
 // Reads Grbl global settings struct from EEPROM.
-uint8_t global_settings() {
+uint8_t Csettings::global_settings() {
 	//// Check version-byte of eeprom
-	eeprom::memcpy_from_eeprom_with_checksum((char*)&settings, EEPROM_ADDR_GLOBAL, sizeof(settings_t));
+	eeprom.memcpy_from_eeprom_with_checksum((char*)&settings, EEPROM_ADDR_GLOBAL, sizeof(settings_t));
 	return(true);
 }
 
 
 // A helper method to set settings from command line
-uint8_t store_global_setting(uint8_t parameter, float value) {
+uint8_t Csettings::store_global_setting(uint8_t parameter, float value) {
 	if (value < 0.0) { return(STATUS_NEGATIVE_VALUE); }
 	if (parameter >= AXIS_SETTINGS_START_VAL) {
 		// Store axis configuration. Axis numbering sequence set by AXIS_SETTING defines.
@@ -249,7 +249,7 @@ uint8_t store_global_setting(uint8_t parameter, float value) {
 
 
 // Initialize the config subsystem
-void init() {
+void Csettings::init() {
 
 	if (!read_global_settings()) {
 		report_status_message(STATUS_SETTING_READ_FAIL);
@@ -277,7 +277,7 @@ void init() {
 
 
 // Returns step pin mask according to Grbl internal axis indexing.
-uint32_t get_step_pin_mask(uint8_t axis_idx)
+uint32_t Csettings::get_step_pin_mask(uint8_t axis_idx)
 {
 	if (axis_idx == X_AXIS) { return((1 << X_STEP_BIT)); }
 	if (axis_idx == Y_AXIS) { return((1 << Y_STEP_BIT)); }
@@ -286,7 +286,7 @@ uint32_t get_step_pin_mask(uint8_t axis_idx)
 
 
 // Returns direction pin mask according to Grbl internal axis indexing.
-uint32_t get_direction_pin_mask(uint8_t axis_idx)
+uint32_t Csettings::get_direction_pin_mask(uint8_t axis_idx)
 {
 	if (axis_idx == X_AXIS) { return((1 << X_DIR_BIT)); }
 	if (axis_idx == Y_AXIS) { return((1 << Y_DIR_BIT)); }
@@ -295,7 +295,7 @@ uint32_t get_direction_pin_mask(uint8_t axis_idx)
 
 
 // Returns limit pin mask according to Grbl internal axis indexing.
-uint32_t get_limit_pin_mask(uint8_t axis_idx)
+uint32_t Csettings::get_limit_pin_mask(uint8_t axis_idx)
 {
 	if (axis_idx == X_AXIS) { return((1 << X_MAX_BIT) | (1 << X_MIN_BIT)); }
 	if (axis_idx == Y_AXIS) { return((1 << Y_MAX_BIT) | (1 << Y_MIN_BIT)); }

@@ -1,16 +1,18 @@
 #include "grbl_print.h"
+#include "HardwareSerial.h"
 
 void String(const char *s)
 {
 	while (*s)
-		serial_write(*s++);
+		//serial::write(*s++);
+	Serial.write(*s);
 }
 
 void Stringln(const char *s) {
 	while (*s) {
-		serial_write(*s++);
+		serial::write(*s++);
 	}
-	serial_ln();
+	String("\n\l");
 }
 
 
@@ -19,7 +21,7 @@ void Stringln(const char *s) {
 void PgmString(const char *s)
 {
 	while (*s)
-		serial_write(*s++);
+		serial::write(*s++);
 }
 
 
@@ -57,13 +59,13 @@ void unsigned_int8(uint8_t n, uint8_t base, uint8_t digits)
 	}
 
 	for (; i > 0; i--)
-		serial_write('0' + buf[i - 1]);
+		serial::write('0' + buf[i - 1]);
 }
 
 
 // Prints an uint8 variable in base 2.
 void uint8_base2(uint8_t n) {
-	print_unsigned_int8(n, 2, 8);
+	print::unsigned_int8(n, 2, 8);
 }
 
 
@@ -74,14 +76,14 @@ void uint8_base10(uint8_t n)
 	if (n < 10) { digits = 1; }
 	else if (n < 100) { digits = 2; }
 	else { digits = 3; }
-	print_unsigned_int8(n, 10, digits);
+	print::unsigned_int8(n, 10, digits);
 }
 
 
 void uint32_base10(uint32_t n)
 {
 	if (n == 0) {
-		serial_write('0');
+		serial::write('0');
 		return;
 	}
 
@@ -94,18 +96,18 @@ void uint32_base10(uint32_t n)
 	}
 
 	for (; i > 0; i--)
-		serial_write('0' + buf[i - 1]);
+		serial::write('0' + buf[i - 1]);
 }
 
 
 void Integer(long n)
 {
 	if (n < 0) {
-		serial_write('-');
-		print_uint32_base10(-n);
+		serial::write('-');
+		print::uint32_base10(-n);
 	}
 	else {
-		print_uint32_base10(n);
+		print::uint32_base10(n);
 	}
 }
 
@@ -118,7 +120,7 @@ void Integer(long n)
 void Float(float n, uint8_t decimal_places)
 {
 	if (n < 0) {
-		serial_write('-');
+		serial::write('-');
 		n = -n;
 	}
 
@@ -150,7 +152,7 @@ void Float(float n, uint8_t decimal_places)
 
 	// Print the generated string.
 	for (; i > 0; i--)
-		serial_write(buf[i - 1]);
+		serial::write(buf[i - 1]);
 }
 
 
@@ -160,24 +162,24 @@ void Float(float n, uint8_t decimal_places)
 //  - RateValue: Handles feed rate and current velocity in inches or mm reporting.
 //  - SettingValue: Handles all floating point settings values (always in mm.)
 void Float_CoordValue(float n) {
-	if (bit_istrue(settings.flags, BITFLAG_REPORT_INCHES)) {
-		printFloat(n*INCH_PER_MM, N_DECIMAL_COORDVALUE_INCH);
+	if (bit_istrue(setting::settings.flags, BITFLAG_REPORT_INCHES)) {
+		print::Float(n*INCH_PER_MM, N_DECIMAL_COORDVALUE_INCH);
 	}
 	else {
-		printFloat(n, N_DECIMAL_COORDVALUE_MM);
+		print::Float(n, N_DECIMAL_COORDVALUE_MM);
 	}
 }
 
 void Float_RateValue(float n) {
-	if (bit_istrue(settings.flags, BITFLAG_REPORT_INCHES)) {
-		printFloat(n*INCH_PER_MM, N_DECIMAL_RATEVALUE_INCH);
+	if (bit_istrue(setting::settings.flags, BITFLAG_REPORT_INCHES)) {
+		print::Float(n*INCH_PER_MM, N_DECIMAL_RATEVALUE_INCH);
 	}
 	else {
-		printFloat(n, N_DECIMAL_RATEVALUE_MM);
+		print::Float(n, N_DECIMAL_RATEVALUE_MM);
 	}
 }
 
-void Float_SettingValue(float n) { printFloat(n, N_DECIMAL_SETTINGVALUE); }
+void Float_SettingValue(float n) { print::Float(n, N_DECIMAL_SETTINGVALUE); }
 
 
 // Debug tool to print free memory in bytes at the called point. 

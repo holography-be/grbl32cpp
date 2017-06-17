@@ -5,21 +5,23 @@
 
 #include "grbl.h"
 
-class laser {
+class Claser {
 private:
 
 public:
-	static void init();
-	static void on();
-	static void off();
-	static uint8_t get_state();
-	static void set_power(float power);
-	static uint8_t getpower();
-	static void power_off();
-	static void set_divisor(float powerdivisor);
-	static float get_divisor();
+	void init();
+	void on();
+	void off();
+	uint8_t get_state();
+	void set_power(float power);
+	uint8_t getpower();
+	void power_off();
+	void set_divisor(float powerdivisor);
+	float get_divisor();
 
 };
+
+extern Claser Laser;
 
 #endif
 

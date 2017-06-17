@@ -107,50 +107,50 @@ typedef struct {
 	uint8_t debug_mode;
 } settings_t;
 
-class setting {
+class Csettings {
 private:
 
 public:
-	static settings_t settings;
+	settings_t settings;
 // Initialize the configuration subsystem (load settings from EEPROM)
-	static void init();
+	void init();
 
 // Helper function to clear and restore EEPROM defaults
-	static void restore(uint8_t restore_flag);
+	void restore(uint8_t restore_flag);
 
 // A helper method to set new settings from command line
-	static uint8_t store_global_setting(uint8_t parameter, float value);
+	uint8_t store_global_setting(uint8_t parameter, float value);
 
 // Stores the protocol line variable as a startup line in EEPROM
-	static void store_startup_line(uint8_t n, char *line);
+	void store_startup_line(uint8_t n, char *line);
 
 // Reads an EEPROM startup line to the protocol line variable
-	static uint8_t read_startup_line(uint8_t n, char *line);
+	uint8_t read_startup_line(uint8_t n, char *line);
 
 // Stores build info user-defined string
-	static void store_build_info(char *line);
+	void store_build_info(char *line);
 
 // Reads build info user-defined string
-	static uint8_t read_build_info(char *line);
+	uint8_t read_build_info(char *line);
 
 // Writes selected coordinate data to EEPROM
-	static void write_coord_data(uint8_t coord_select, float *coord_data);
+	void write_coord_data(uint8_t coord_select, float *coord_data);
 
 // Reads selected coordinate data from EEPROM
-	static uint8_t read_coord_data(uint8_t coord_select, float *coord_data);
+	uint8_t read_coord_data(uint8_t coord_select, float *coord_data);
 
 // Returns the step pin mask according to Grbl's internal axis numbering
-	static uint32_t get_step_pin_mask(uint8_t i);
+	uint32_t get_step_pin_mask(uint8_t i);
 
 // Returns the direction pin mask according to Grbl's internal axis numbering
-	static uint32_t get_direction_pin_mask(uint8_t i);
+	uint32_t get_direction_pin_mask(uint8_t i);
 
 // Returns the limit pin mask according to Grbl's internal axis numbering
-	static uint32_t get_limit_pin_mask(uint8_t i);
+	uint32_t get_limit_pin_mask(uint8_t i);
 
 };
 
-
+extern Csettings settings;
 
 
 #endif

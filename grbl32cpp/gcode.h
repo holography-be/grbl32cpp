@@ -193,20 +193,22 @@
 //} parser_block_t;
 //extern parser_block_t gc_block;
 
-class gcode {
+class Cgcode {
 private:
 
 public:
 
 // Initialize the parser
-	static void gc_init();
+	void gc_init();
 
 // Execute one block of rs275/ngc/g-code
-	static uint8_t gc_execute_line(char *line);
+	uint8_t gc_execute_line(char *line);
 
 // Set g-code parser position. Input in steps.
-	static void gc_sync_position();
+	void gc_sync_position();
 
 };
+
+extern Cgcode gcode;
 
 #endif

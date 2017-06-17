@@ -23,17 +23,19 @@ along with Grbl.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "grbl.h"
 
-class eeprom {
+class Ceeprom {
 
 private:
 
 public:
 
-	static unsigned char eeprom_get_char(unsigned int addr);
-	static void eeprom_put_char(unsigned int addr, unsigned char new_value);
-	static void memcpy_to_eeprom_with_checksum(unsigned int destination, char *source, unsigned int size);
-	static int memcpy_from_eeprom_with_checksum(char *destination, unsigned int source, unsigned int size);
+	unsigned char get_char(unsigned int addr);
+	void put_char(unsigned int addr, unsigned char new_value);
+	void memcpy_to_eeprom_with_checksum(unsigned int destination, char *source, unsigned int size);
+	int memcpy_from_eeprom_with_checksum(char *destination, unsigned int source, unsigned int size);
 
 };
+
+extern Ceeprom eeprom;
 
 #endif
