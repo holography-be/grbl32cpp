@@ -108,6 +108,9 @@
     <ClInclude Include="grbl_print.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="cpu_map_ChipKitMax32.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AT24CX.cpp">
@@ -134,13 +137,13 @@
     <ClCompile Include="coolant_control.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="gcode.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="grbl_print.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="limits.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="gcode.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

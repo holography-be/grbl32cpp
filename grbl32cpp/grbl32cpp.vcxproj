@@ -92,6 +92,9 @@
       <FileType>CppCode</FileType>
     </ClInclude>
     <ClInclude Include="cpu_map\cpu_map_ChipKitMax32.h" />
+    <ClInclude Include="cpu_map_ChipKitMax32.h">
+      <FileType>CppCode</FileType>
+    </ClInclude>
     <ClInclude Include="defaults.h">
       <FileType>CppCode</FileType>
     </ClInclude>

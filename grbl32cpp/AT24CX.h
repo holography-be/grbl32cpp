@@ -27,8 +27,10 @@ THE SOFTWARE.
 #ifndef AT24CX_h
 #define AT24CX_h
 
+#include "grbl.h"
+
 // includes
-#include <Arduino.h>
+//#include <Arduino.h>
 
 // byte
 typedef uint8_t byte;
