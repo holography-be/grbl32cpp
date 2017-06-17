@@ -15,6 +15,7 @@
 #include <wiring.h>
 
 // Define the Grbl system include files. NOTE: Do not alter organization.
+#include "AT24CX.h"
 #include "cpu_map.h"
 #include "extern_definition.h"
 #include "config.h"
@@ -27,7 +28,7 @@
 #include "coolant_control.h"
 #include "eeprom.h"
 #include "gcode.h"
-#include "limits.h"
+#include "limits.h"	// continue ici
 #include "motion_control.h"
 #include "planner.h"
 #include "grbl_print.h"

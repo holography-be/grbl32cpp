@@ -1,7 +1,7 @@
 #include "laser.h"
 
 
-void laser_init()
+void init()
 {
 	laser_power = 0.0;
 	laser_divisor = 1.00;
@@ -22,7 +22,7 @@ void laser_init()
 	//printStringln("Laser power init");
 }
 
-void laser_on() {
+void on() {
 	if (laser_state == LASER_STATE_OFF) {
 		LASER_ON_PORT->LATxSET.w |= (1 << LASER_ON_MASK);
 		LASER_FAN_PORT->LATxSET.w = LASER_FAN_MASK;
@@ -31,25 +31,25 @@ void laser_on() {
 	}
 }
 
-void laser_off() {
+void off() {
 	if (laser_state == LASER_STATE_ON) {
 		LASER_ON_PORT->LATxCLR.w = (1 << LASER_ON_MASK);
 		laser_state = LASER_STATE_OFF;
-		laser_power_off();
+		power_off();
 		led::off(LED_LASER);
 	}
 }
 
 ///<returns>return value : 0=off, 1=on</returns>
-uint8_t laser_get_state() {
+uint8_t get_state() {
 	return laser_state;
 }
 
-void laser_power_off() {
-	laser_set_power(0.00);
+void power_off() {
+	set_power(0.00);
 }
 
-void laser_set_power(float power) {
+void set_power(float power) {
 	if (laser_state == LASER_STATE_OFF) { return; }
 	laser_power = power;
 	if (laser_power <= 0.00) {
@@ -83,11 +83,11 @@ void laser_set_power(float power) {
 }
 
 
-uint8_t laser_get_power() {
+uint8_t get_power() {
 	return (int)laser_power;
 }
 
-void laser_setdivisor(float power_divisor) {
+void set_divisor(float power_divisor) {
 	if (power_divisor > 1.00) {
 		power_divisor = 1.00;
 	}
@@ -95,10 +95,10 @@ void laser_setdivisor(float power_divisor) {
 		power_divisor = 0.00;
 	}
 	laser_divisor = power_divisor;
-	laser_set_power((int)laser_power);
+	set_power((int)laser_power);
 }
 
-float laser_get_divisor() {
+float get_divisor() {
 	return laser_divisor;
 }
 

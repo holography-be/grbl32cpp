@@ -108,41 +108,50 @@ typedef struct {
 } settings_t;
 extern settings_t settings;
 
+class settings {
+private:
+
+public:
+	settings_t settings;
 // Initialize the configuration subsystem (load settings from EEPROM)
-void settings_init();
+	static void settings_init();
 
 // Helper function to clear and restore EEPROM defaults
-void settings_restore(uint8_t restore_flag);
+	static void settings_restore(uint8_t restore_flag);
 
 // A helper method to set new settings from command line
-uint8_t settings_store_global_setting(uint8_t parameter, float value);
+	static uint8_t settings_store_global_setting(uint8_t parameter, float value);
 
 // Stores the protocol line variable as a startup line in EEPROM
-void settings_store_startup_line(uint8_t n, char *line);
+	static void settings_store_startup_line(uint8_t n, char *line);
 
 // Reads an EEPROM startup line to the protocol line variable
-uint8_t settings_read_startup_line(uint8_t n, char *line);
+	static uint8_t settings_read_startup_line(uint8_t n, char *line);
 
 // Stores build info user-defined string
-void settings_store_build_info(char *line);
+	static void settings_store_build_info(char *line);
 
 // Reads build info user-defined string
-uint8_t settings_read_build_info(char *line);
+	static uint8_t settings_read_build_info(char *line);
 
 // Writes selected coordinate data to EEPROM
-void settings_write_coord_data(uint8_t coord_select, float *coord_data);
+	static void settings_write_coord_data(uint8_t coord_select, float *coord_data);
 
 // Reads selected coordinate data from EEPROM
-uint8_t settings_read_coord_data(uint8_t coord_select, float *coord_data);
+	static uint8_t settings_read_coord_data(uint8_t coord_select, float *coord_data);
 
 // Returns the step pin mask according to Grbl's internal axis numbering
-uint32_t get_step_pin_mask(uint8_t i);
+	static uint32_t get_step_pin_mask(uint8_t i);
 
 // Returns the direction pin mask according to Grbl's internal axis numbering
-uint32_t get_direction_pin_mask(uint8_t i);
+	static uint32_t get_direction_pin_mask(uint8_t i);
 
 // Returns the limit pin mask according to Grbl's internal axis numbering
-uint32_t get_limit_pin_mask(uint8_t i);
+	static uint32_t get_limit_pin_mask(uint8_t i);
+
+};
+
+
 
 
 #endif

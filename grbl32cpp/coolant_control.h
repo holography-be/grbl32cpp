@@ -21,10 +21,17 @@ along with Grbl.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef coolant_control_h
 #define coolant_control_h 
 
+#include "grbl.h"
 
-void coolant_init();
-void coolant_stop();
-void coolant_set_state(uint8_t mode);
-void coolant_run(uint8_t mode);
+class coolant {
+private:
+public:
+	static void init();
+	static void stop();
+	static void set_state(uint8_t mode);
+	static void run(uint8_t mode);
+};
+
+
 
 #endif
