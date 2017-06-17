@@ -92,22 +92,22 @@ public:
 	volatile uint8_t sys_rt_exec_alarm;  // Global realtime executor bitflag variable for setting various alarms.
 
 	// Initialize the serial protocol
-	static void system_init();
+	static void init();
 
 	// Returns if safety door is open or closed, based on pin state.
-	static uint8_t system_check_safety_door_ajar();
+	static uint8_t check_safety_door_ajar();
 
 	// Executes an internal system command, defined as a string starting with a '$'
-	static uint8_t system_execute_line(char *line);
+	static uint8_t execute_line(char *line);
 
 	// Execute the startup script lines stored in EEPROM upon initialization
-	static void system_execute_startup(char *line);
+	static void execute_startup(char *line);
 
 	// Returns machine position of axis 'idx'. Must be sent a 'step' array.
-	static float system_convert_axis_steps_to_mpos(int32_t *steps, uint8_t idx);
+	static float convert_axis_steps_to_mpos(int32_t *steps, uint8_t idx);
 
 	// Updates a machine 'position' array based on the 'step' array sent.
-	static void system_convert_array_steps_to_mpos(float *position, int32_t *steps);
+	static void convert_array_steps_to_mpos(float *position, int32_t *steps);
 
 };
 

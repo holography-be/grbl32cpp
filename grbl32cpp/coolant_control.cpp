@@ -26,7 +26,7 @@ void set_state(uint8_t mode)
 		laser::on();
 	}
 	else {
-		collant::stop();
+		stop();
 	}
 }
 
@@ -35,6 +35,6 @@ void run(uint8_t mode)
 	if (sys.state == STATE_CHECK_MODE) { return; }
 	// laser fan must be on immediately
 	protocol_buffer_synchronize(); // Ensure coolant turns on when specified in program.  
-	coolant::set_state(mode);
+	set_state(mode);
 }
 

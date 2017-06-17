@@ -76,43 +76,43 @@ private:
 
 public:
 // Prints system status messages.
-	static void report_status_message(uint8_t status_code);
+	static void status_message(uint8_t status_code);
 
 // Prints system alarm messages.
-	static void report_alarm_message(int8_t alarm_code);
+	static void alarm_message(int8_t alarm_code);
 
 // Prints miscellaneous feedback messages.
-	static void report_feedback_message(uint8_t message_code);
+	static void feedback_message(uint8_t message_code);
 
 // Prints welcome message
-	static void report_init_message();
+	static void init_message();
 
 // Prints Grbl help and current global settings
-	static void report_grbl_help();
+	static void grbl_help();
 
 // Prints Grbl global settings
-	static void report_grbl_settings();
+	static void grbl_settings();
 
 // Prints an echo of the pre-parsed line received right before execution.
-	static void report_echo_line_received(char *line);
+	static void echo_line_received(char *line);
 
 // Prints realtime status report
-	static void report_realtime_status();
+	static void realtime_status();
 
 // Prints recorded probe position
-	static void report_probe_parameters();
+	static void probe_parameters();
 
 // Prints Grbl NGC parameters (coordinate offsets, probe)
-	static void report_ngc_parameters();
+	static void ngc_parameters();
 
 // Prints current g-code parser mode state
-	static void report_gcode_modes();
+	static void gcode_modes();
 
 // Prints startup line
-	static void report_startup_line(uint8_t n, char *line);
+	static void startup_line(uint8_t n, char *line);
 
 // Prints build info and user info
-	static void report_build_info(char *line);
+	static void build_info(char *line);
 };
 
 

@@ -1,8 +1,8 @@
 #include "system.h"
 
-void system_init()
+void init()
 {
-
+	
 	/*
 	CN CONFIGURATION AND OPERATION
 	The CN pins are configured as follows:
@@ -70,7 +70,7 @@ void system_init()
 
 
 // Executes user startup script, if stored.
-void system_execute_startup(char *line)
+void execute_startup(char *line)
 {
 	uint8_t n;
 	for (n = 0; n < N_STARTUP_LINE; n++) {
@@ -95,7 +95,7 @@ void system_execute_startup(char *line)
 // the lines that are processed afterward, not necessarily real-time during a cycle, 
 // since there are motions already stored in the buffer. However, this 'lag' should not
 // be an issue, since these commands are not typically used during a cycle.
-uint8_t system_execute_line(char *line)
+uint8_t execute_line(char *line)
 {
 	uint8_t char_counter = 1;
 	uint8_t helper_var = 0; // Helper variable
@@ -259,7 +259,7 @@ uint8_t system_execute_line(char *line)
 // Returns machine position of axis 'idx'. Must be sent a 'step' array.
 // NOTE: If motor steps and machine position are not in the same coordinate frame, this function
 //   serves as a central place to compute the transformation.
-float system_convert_axis_steps_to_mpos(int32_t *steps, uint8_t idx)
+float convert_axis_steps_to_mpos(int32_t *steps, uint8_t idx)
 {
 	float pos;
 #ifdef COREXY
@@ -279,7 +279,7 @@ float system_convert_axis_steps_to_mpos(int32_t *steps, uint8_t idx)
 }
 
 
-void system_convert_array_steps_to_mpos(float *position, int32_t *steps)
+void convert_array_steps_to_mpos(float *position, int32_t *steps)
 {
 	uint8_t idx;
 	for (idx = 0; idx<N_AXIS; idx++) {

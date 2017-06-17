@@ -1,4 +1,4 @@
-#include "gcode.h"
+
 
 #define MAX_LINE_NUMBER 9999999 
 
@@ -20,7 +20,7 @@ void gc_init()
 
 	// Load default G54 coordinate system.
 	if (!(settings::settings_read_coord_data(gc_state.modal.coord_select, gc_state.coord_system))) {
-		report_status_message(STATUS_SETTING_READ_FAIL);
+		report::status_message(STATUS_SETTING_READ_FAIL);
 	}
 	//printStringln("GC init");
 }
@@ -30,7 +30,7 @@ void gc_init()
 // limit pull-off routines.
 void gc_sync_position()
 {
-	system_convert_array_steps_to_mpos(gc_state.position, sys.position);
+	system::convert_array_steps_to_mpos(gc_state.position, sys.position);
 }
 
 
@@ -85,7 +85,7 @@ uint8_t gc_execute_line(char *line)
 	float value;
 	uint8_t int_value = 0;
 	uint16_t mantissa = 0;
-	if (settings.debug_mode == DEBUG_MODE_ON) {
+	if (settings::settings.debug_mode == DEBUG_MODE_ON) {
 		printString("line :");
 		printStringln(line);
 	}
@@ -292,11 +292,11 @@ uint8_t gc_execute_line(char *line)
 #endif
 				case 8:
 					gc_block.modal.coolant = LASER_ENABLE;
-					if (settings.debug_mode == DEBUG_MODE_ON) printStringln("laser on");
+					if (settings::settings.debug_mode == DEBUG_MODE_ON) printStringln("laser on");
 					break;
 				case 9:
 					gc_block.modal.coolant = LASER_DISABLE;
-					if (settings.debug_mode == DEBUG_MODE_ON) printStringln("laser off");
+					if (settings::settings.debug_mode == DEBUG_MODE_ON) printStringln("laser off");
 					break;
 				}
 				break;

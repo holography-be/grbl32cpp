@@ -237,5 +237,15 @@ along with Grbl.  If not, see <http://www.gnu.org/licenses/>.
 #define HOMING_AXIS_LOCATE_SCALAR  5.0 // Must be > 1 to ensure limit switch is cleared.
 #endif
 
+// Modal Group M7: Spindle control
+#define SPINDLE_DISABLE 0 // M5 (Default: Must be zero)
+#define SPINDLE_ENABLE_CW 1 // M3
+#define SPINDLE_ENABLE_CCW 2 // M4
+
+// Modal Group M8: Coolant control
+#define COOLANT_DISABLE 0 // M9 (Default: Must be zero)
+#define COOLANT_MIST_ENABLE 1 // M7
+#define COOLANT_FLOOD_ENABLE 2 // M8
+
 #define GRBL_PLATFORM "ChipKIT Max32"
 

@@ -22,22 +22,30 @@
 #ifndef limits_h
 #define limits_h 
 
+//#include "extern_definition.h"
+
 #include "grbl.h"
-#include "extern_definition.h"
 
-// Initialize the limits module
-void limits_init();
+class limits {
+private:
 
-// Disables hard limits.
-void limits_disable();
+public:
+	// Initialize the limits module
+	static void init();
 
-// Returns limit state as a bit-wise uint8 variable.
-uint8_t limits_get_state();
+	// Disables hard limits.
+	static void disable();
 
-// Perform one portion of the homing cycle based on the input settings.
-void limits_go_home(uint8_t cycle_mask);
+	// Returns limit state as a bit-wise uint8 variable.
+	static uint8_t get_state();
 
-// Check for soft limit violations
-void limits_soft_check(float *target);
+	// Perform one portion of the homing cycle based on the input settings.
+	static void go_home(uint8_t cycle_mask);
+
+	// Check for soft limit violations
+	static void soft_check(float *target);
+
+};
+
 
 #endif

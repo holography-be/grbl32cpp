@@ -9,7 +9,7 @@
 // responses.
 // NOTE: In silent mode, all error codes are greater than zero.
 // TODO: Install silent mode to return only numeric values, primarily for GUIs.
-void report_status_message(uint8_t status_code)
+void status_message(uint8_t status_code)
 {
 	if (status_code == 0) { // STATUS_OK
 		printStringln("ok");
@@ -64,7 +64,7 @@ void report_status_message(uint8_t status_code)
 }
 
 // Prints alarm messages.
-void report_alarm_message(int8_t alarm_code)
+void alarm_message(int8_t alarm_code)
 {
 	printPgmString("ALARM: ");
 #ifdef REPORT_GUI_MODE
@@ -92,7 +92,7 @@ void report_alarm_message(int8_t alarm_code)
 // NOTE: For interfaces, messages are always placed within brackets. And if silent mode
 // is installed, the message number codes are less than zero.
 // TODO: Install silence feedback messages option in settings
-void report_feedback_message(uint8_t message_code)
+void feedback_message(uint8_t message_code)
 {
 	printPgmString("[");
 	switch (message_code) {
@@ -118,7 +118,7 @@ void report_feedback_message(uint8_t message_code)
 
 
 // Welcome message
-void report_init_message()
+void init_message()
 {
 	printStringln("\r\nGrbl Max " GRBL_VERSION " ['$' for help]");
 }
@@ -146,7 +146,7 @@ void report_grbl_help() {
 
 // Grbl global settings print out.
 // NOTE: The numbering scheme here must correlate to storing in settings.c
-void report_grbl_settings() {
+void grbl_settings() {
 	// Print Grbl settings.
 #ifdef REPORT_GUI_MODE
 	printPgmString("$0="); print_uint8_base10(settings.pulse_microseconds);
@@ -240,7 +240,7 @@ void report_grbl_settings() {
 // Prints current probe parameters. Upon a probe command, these parameters are updated upon a
 // successful probe or upon a failed probe with the G38.3 without errors command (if supported). 
 // These values are retained until Grbl is power-cycled, whereby they will be re-zeroed.
-void report_probe_parameters()
+void probe_parameters()
 {
 	uint8_t i;
 	float print_position[N_AXIS];
@@ -259,7 +259,7 @@ void report_probe_parameters()
 
 
 // Prints Grbl NGC parameters (coordinate offsets, probing)
-void report_ngc_parameters()
+void ngc_parameters()
 {
 	float coord_data[N_AXIS];
 	uint8_t coord_select, i;
@@ -295,7 +295,7 @@ void report_ngc_parameters()
 
 
 // Print current gcode parser mode state
-void report_gcode_modes()
+void gcode_modes()
 {
 	printPgmString("[");
 
@@ -363,7 +363,7 @@ void report_gcode_modes()
 }
 
 // Prints specified startup line
-void report_startup_line(uint8_t n, char *line)
+void startup_line(uint8_t n, char *line)
 {
 	printPgmString("$N"); print_uint8_base10(n);
 	printPgmString("="); printString(line);
@@ -372,7 +372,7 @@ void report_startup_line(uint8_t n, char *line)
 
 
 // Prints build info line
-void report_build_info(char *line)
+void build_info(char *line)
 {
 	printPgmString("[" GRBL_VERSION "." GRBL_VERSION_BUILD ":");
 	printString(line);
@@ -382,7 +382,7 @@ void report_build_info(char *line)
 
 // Prints the character string line Grbl has received from the user, which has been pre-parsed,
 // and has been sent into protocol_execute_line() routine to be executed by Grbl.
-void report_echo_line_received(char *line)
+void echo_line_received(char *line)
 {
 	printPgmString("[echo: "); printString(line);
 	printPgmString("]\r\n");
@@ -394,7 +394,7 @@ void report_echo_line_received(char *line)
 // specific needs, but the desired real-time data report must be as short as possible. This is
 // requires as it minimizes the computational overhead and allows grbl to keep running smoothly, 
 // especially during g-code programs with fast, short line segments and high frequency reports (5-20Hz).
-void report_realtime_status()
+void realtime_status()
 {
 	// **Under construction** Bare-bones status report. Provides real-time machine position relative to 
 	// the system power on location (0,0,0) and work coordinate position (G54 and G92 applied). Eventually

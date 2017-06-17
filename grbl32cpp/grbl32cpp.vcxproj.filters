@@ -24,9 +24,6 @@
     <ClInclude Include="p32mx795f512l.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="LiquidCrystal_I2C.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="AT24CX.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -108,11 +105,11 @@
     <ClInclude Include="defaults\defaults_generic.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="grbl_print.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="LiquidCrystal_I2C.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="AT24CX.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -138,6 +135,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="gcode.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="grbl_print.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="limits.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
