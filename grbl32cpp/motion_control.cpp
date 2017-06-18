@@ -16,7 +16,7 @@ void Cmotion::mc_line(float *target, float feed_rate, uint8_t invert_feed_rate)
 {
 	// If enabled, check for soft limit violations. Placed here all line motions are picked up
 	// from everywhere in Grbl.
-	if (bit_istrue(Settings.settings.flags, BITFLAG_SOFT_LIMIT_ENABLE)) { limits_soft_check(target); }
+	if (bit_istrue(Settings.settings.flags, BITFLAG_SOFT_LIMIT_ENABLE)) { Limits.soft_check(target); }
 
 	// If in check gcode mode, prevent motion by blocking planner. Soft limits still work.
 	if (sys.state == STATE_CHECK_MODE) { return; }
@@ -38,17 +38,17 @@ void Cmotion::mc_line(float *target, float feed_rate, uint8_t invert_feed_rate)
 	// If the buffer is full: good! That means we are well ahead of the robot. 
 	// Remain in this loop until there is room in the buffer.
 	do {
-		protocol_execute_realtime(); // Check for any run-time commands
+		Protocol.execute_realtime(); // Check for any run-time commands
 		if (sys.abort) { return; } // Bail, if system abort.
-		if (plan_check_full_buffer()) { protocol_auto_cycle_start(); } // Auto-cycle start when buffer is full.
+		if (Planner.check_full_buffer()) { Protocol.auto_cycle_start(); } // Auto-cycle start when buffer is full.
 		else { break; }
 	} while (1);
 
 	// Plan and queue motion into planner buffer
 #ifdef USE_LINE_NUMBERS
-	Cmotion::plan_buffer_line(target, feed_rate, invert_feed_rate, line_number);
+	Planner.buffer_line(target, feed_rate, invert_feed_rate, line_number);
 #else
-	Cmotion::plan_buffer_line(target, feed_rate, invert_feed_rate);
+	Planner.buffer_line(target, feed_rate, invert_feed_rate);
 #endif
 }
 
@@ -89,7 +89,7 @@ void Cmotion::mc_arc(float *position, float *target, float *offset, float radius
 	// is desired, i.e. least-squares, midpoint on arc, just change the mm_per_arc_segment calculation.
 	// For the intended uses of Grbl, this value shouldn't exceed 2000 for the strictest of cases.
 	uint16_t segments = floor(fabs(0.5*angular_travel*radius) /
-		sqrt(settings.arc_tolerance*(2 * radius - settings.arc_tolerance)));
+		sqrt(Settings.settings.arc_tolerance*(2 * radius - Settings.settings.arc_tolerance)));
 
 	if (segments) {
 		// Multiply inverse feed_rate to compensate for the fact that this movement is approximated
@@ -212,31 +212,31 @@ void Cmotion::mc_homing_cycle()
 	}
 #endif
 
-	limits_disable(); // Disable hard limits pin change register for cycle duration
+	Limits.disable(); // Disable hard limits pin change register for cycle duration
 
 	// -------------------------------------------------------------------------------------
 	// Perform homing routine. NOTE: Special motion case. Only system reset works.
 
 	// Search to engage all axes limit switches at faster homing seek rate.
-	limits_go_home(HOMING_CYCLE_0);  // Homing cycle 0
+	Limits.go_home(HOMING_CYCLE_0);  // Homing cycle 0
 #ifdef HOMING_CYCLE_1
-	limits_go_home(HOMING_CYCLE_1);  // Homing cycle 1
+	Limits.go_home(HOMING_CYCLE_1);  // Homing cycle 1
 #endif
 #ifdef HOMING_CYCLE_2
-	limits_go_home(HOMING_CYCLE_2);  // Homing cycle 2
+	Limits.go_home(HOMING_CYCLE_2);  // Homing cycle 2
 #endif
 
-	protocol_execute_realtime(); // Check for reset and set system abort.
+	Protocol.execute_realtime(); // Check for reset and set system abort.
 	if (sys.abort) { return; } // Did not complete. Alarm state set by mc_alarm.
 
 	// Homing cycle complete! Setup system for normal operation.
 	// -------------------------------------------------------------------------------------
 
 	// Gcode parser position was circumvented by the limits_go_home() routine, so sync position now.
-	gc_sync_position();
+	Gcode.gc_sync_position();
 
 	// If hard limits feature enabled, re-enable hard limits pin change register after homing cycle.
-	limits_init();
+	Limits.init();
 }
 
 
@@ -254,17 +254,17 @@ void Cmotion::mc_probe_cycle(float *target, float feed_rate, uint8_t invert_feed
 	if (sys.state == STATE_CHECK_MODE) { return; }
 
 	// Finish all queued commands and empty planner buffer before starting probe cycle.
-	protocol_buffer_synchronize();
+	Protocol.buffer_synchronize();
 
 	// Initialize probing control variables
 	sys.probe_succeeded = false; // Re-initialize probe history before beginning cycle.  
-	probe_configure_invert_mask(is_probe_away);
+	Probe.configure_invert_mask(is_probe_away);
 
 	// After syncing, check if probe is already triggered. If so, halt and issue alarm.
 	// NOTE: This probe initialization error applies to all probing cycles.
-	if (probe_get_state()) { // Check probe pin state.
-		bit_true_atomic(sys_rt_exec_alarm, EXEC_ALARM_PROBE_FAIL);
-		protocol_execute_realtime();
+	if (Probe.get_state()) { // Check probe pin state.
+		bit_true_atomic(System.sys_rt_exec_alarm, EXEC_ALARM_PROBE_FAIL);
+		Protocol.execute_realtime();
 	}
 	if (sys.abort) { return; } // Return if system reset has been issued.
 
@@ -276,33 +276,33 @@ void Cmotion::mc_probe_cycle(float *target, float feed_rate, uint8_t invert_feed
 #endif
 
 	// Activate the probing state monitor in the stepper module.
-	sys_probe_state = PROBE_ACTIVE;
+	System.sys_probe_state = PROBE_ACTIVE;
 
 	// Perform probing cycle. Wait here until probe is triggered or motion completes.
-	bit_true_atomic(sys_rt_exec_state, EXEC_CYCLE_START);
+	bit_true_atomic(System.sys_rt_exec_state, EXEC_CYCLE_START);
 	do {
-		protocol_execute_realtime();
+		Protocol.execute_realtime();
 		if (sys.abort) { return; } // Check for system abort
 	} while (sys.state != STATE_IDLE);
 
 	// Probing cycle complete!
 
 	// Set state variables and error out, if the probe failed and cycle with error is enabled.
-	if (sys_probe_state == PROBE_ACTIVE) {
+	if (System.sys_probe_state == PROBE_ACTIVE) {
 		if (is_no_error) { memcpy(sys.probe_position, sys.position, sizeof(float)*N_AXIS); }
-		else { bit_true_atomic(sys_rt_exec_alarm, EXEC_ALARM_PROBE_FAIL); }
+		else { bit_true_atomic(System.sys_rt_exec_alarm, EXEC_ALARM_PROBE_FAIL); }
 	}
 	else {
 		sys.probe_succeeded = true; // Indicate to system the probing cycle completed successfully.
 	}
-	sys_probe_state = PROBE_OFF; // Ensure probe state monitor is disabled.
-	protocol_execute_realtime();   // Check and execute run-time commands
+	System.sys_probe_state = PROBE_OFF; // Ensure probe state monitor is disabled.
+	Protocol.execute_realtime();   // Check and execute run-time commands
 	if (sys.abort) { return; } // Check for system abort
 
 	// Reset the stepper and planner buffers to remove the remainder of the probe motion.
-	st_reset(); // Reest step segment buffer.
-	plan_reset(); // Reset planner buffer. Zero planner positions. Ensure probing motion is cleared.
-	plan_sync_position(); // Sync planner position to current machine position.
+	Stepper.st_reset(); // Reest step segment buffer.
+	Planner.reset(); // Reset planner buffer. Zero planner positions. Ensure probing motion is cleared.
+	Planner.sync_position(); // Sync planner position to current machine position.
 
 	// TODO: Update the g-code parser code to not require this target calculation but uses a gc_sync_position() call.
 	// NOTE: The target[] variable updated here will be sent back and synced with the g-code parser.
@@ -310,7 +310,7 @@ void Cmotion::mc_probe_cycle(float *target, float feed_rate, uint8_t invert_feed
 
 #ifdef MESSAGE_PROBE_COORDINATES
 	// All done! Output the probe position as message.
-	report.probe_parameters();
+	Report.probe_parameters();
 #endif
 }
 
@@ -323,20 +323,20 @@ void Cmotion::mc_probe_cycle(float *target, float feed_rate, uint8_t invert_feed
 void Cmotion::mc_reset()
 {
 	// Only this function can set the system reset. Helps prevent multiple kill calls.
-	if (bit_isfalse(sys_rt_exec_state, EXEC_RESET)) {
-		bit_true_atomic(sys_rt_exec_state, EXEC_RESET);
+	if (bit_isfalse(System.sys_rt_exec_state, EXEC_RESET)) {
+		bit_true_atomic(System.sys_rt_exec_state, EXEC_RESET);
 
 		// Kill spindle and coolant.   
-		laser.off();
+		Laser.off();
 
 		// Kill steppers only if in any motion state, i.e. cycle, actively holding, or homing.
 		// NOTE: If steppers are kept enabled via the step idle delay setting, this also keeps
 		// the steppers enabled by avoiding the go_idle call altogether, unless the motion state is
 		// violated, by which, all bets are off.
 		if ((sys.state & (STATE_CYCLE | STATE_HOMING)) || (sys.suspend == SUSPEND_ENABLE_HOLD)) {
-			if (sys.state == STATE_HOMING) { bit_true_atomic(sys_rt_exec_alarm, EXEC_ALARM_HOMING_FAIL); }
-			else { bit_true_atomic(sys_rt_exec_alarm, EXEC_ALARM_ABORT_CYCLE); }
-			st_go_idle(); // Force kill steppers. Position has likely been lost.
+			if (sys.state == STATE_HOMING) { bit_true_atomic(System.sys_rt_exec_alarm, EXEC_ALARM_HOMING_FAIL); }
+			else { bit_true_atomic(System.sys_rt_exec_alarm, EXEC_ALARM_ABORT_CYCLE); }
+			Stepper.st_go_idle(); // Force kill steppers. Position has likely been lost.
 		}
 	}
 }

@@ -210,6 +210,6 @@ public:
 
 };
 
-extern Cgcode gcode;
+extern Cgcode Gcode;
 
 #endif

@@ -44,11 +44,11 @@ uint8_t Cprobe::get_state() { return((CONTROL2_PORT->PORTxbits.w & Z_PROBE_BIT) 
 // NOTE: This function must be extremely efficient as to not bog down the stepper ISR.
 void Cprobe::state_monitor()
 {
-	if (sys_probe_state == PROBE_ACTIVE) {
-		if (probe_get_state()) {
-			sys_probe_state = PROBE_OFF;
+	if (System.sys_probe_state == PROBE_ACTIVE) {
+		if (Probe.get_state()) {
+			System.sys_probe_state = PROBE_OFF;
 			memcpy(sys.probe_position, sys.position, sizeof(sys.position));
-			bit_true(sys_rt_exec_state, EXEC_MOTION_CANCEL);
+			bit_true(System.sys_rt_exec_state, EXEC_MOTION_CANCEL);
 		}
 	}
 }

@@ -22,6 +22,7 @@
 #ifndef planner_h
 #define planner_h
 
+#include "grbl.h"
 
 // The number of linear motions that can be in the plan at any give time
 #ifndef BLOCK_BUFFER_SIZE
@@ -62,6 +63,19 @@ private:
 
 public:
 // Initialize and reset the motion plan subsystem
+
+	static plan_block_t block_buffer[BLOCK_BUFFER_SIZE];  // A ring buffer for motion instructions
+	static uint8_t block_buffer_tail;     // Index of the block to process now
+	static uint8_t block_buffer_head;     // Index of the next block to be pushed
+	static uint8_t next_buffer_head;      // Index of the next buffer head
+	static uint8_t block_buffer_planned;  // Index of the optimally planned block
+
+	static void recalculate();
+	static uint8_t prev_block_index(uint8_t block_index);
+// Called periodically by step segment buffer. Mostly used internally by planner.
+	static uint8_t next_block_index(uint8_t block_index);
+
+
   void reset();
 
 // Add a new linear movement to the buffer. target[N_AXIS] is the signed, absolute target position 
@@ -78,8 +92,7 @@ void discard_current_block();
 // Gets the current block. Returns NULL if buffer empty
 plan_block_t *get_current_block();
 
-// Called periodically by step segment buffer. Mostly used internally by planner.
-uint8_t next_block_index(uint8_t block_index);
+
 
 // Called by step segment buffer when computing executing block velocity profile.
 float get_exec_block_exit_speed();
@@ -94,7 +107,7 @@ void cycle_reinitialize();
 uint8_t get_block_buffer_count();
 
 // Returns the status of the block ring buffer. True, if buffer is full.
-uint8_t plan_check_full_buffer();
+uint8_t check_full_buffer();
 
 };
 

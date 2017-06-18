@@ -11,7 +11,7 @@ uint8_t Cplanner::next_block_index(uint8_t block_index)
 
 
 // Returns the index of the previous block in the ring buffer
-static uint8_t prev_block_index(uint8_t block_index)
+uint8_t Cplanner::prev_block_index(uint8_t block_index)
 {
 	if (block_index == 0) { block_index = BLOCK_BUFFER_SIZE; }
 	block_index--;
@@ -84,7 +84,7 @@ to compute an optimal plan, so select carefully. The Arduino 328p memory is alre
 ARM versions should have enough memory and speed for look-ahead blocks numbering up to a hundred or more.
 
 */
-static void planner_recalculate()
+void Cplanner::recalculate()
 {
 	// Initialize block index to the last block in the planner buffer.
 	uint8_t block_index = prev_block_index(block_buffer_head);
@@ -102,19 +102,19 @@ static void planner_recalculate()
 	// Calculate maximum entry speed for last block in buffer, where the exit speed is always zero.
 	current->entry_speed_sqr = min(current->max_entry_speed_sqr, 2 * current->acceleration*current->millimeters);
 
-	block_index = plan_prev_block_index(block_index);
+	block_index = prev_block_index(block_index);
 	if (block_index == block_buffer_planned) { // Only two plannable blocks in buffer. Reverse pass complete.
 		// Check if the first block is the tail. If so, notify stepper to update its current parameters.
-		if (block_index == block_buffer_tail) { st_update_plan_block_parameters(); }
+		if (block_index == block_buffer_tail) { Stepper.st_update_plan_block_parameters(); }
 	}
 	else { // Three or more plan-able blocks
 		while (block_index != block_buffer_planned) {
 			next = current;
 			current = &block_buffer[block_index];
-			block_index = plan_prev_block_index(block_index);
+			block_index = prev_block_index(block_index);
 
 			// Check if next block is the tail block(=planned block). If so, update current stepper parameters.
-			if (block_index == block_buffer_tail) { st_update_plan_block_parameters(); }
+			if (block_index == block_buffer_tail) { Stepper.st_update_plan_block_parameters(); }
 
 			// Compute maximum entry speed decelerating over the current block from its exit speed.
 			if (current->entry_speed_sqr != current->max_entry_speed_sqr) {
@@ -132,7 +132,7 @@ static void planner_recalculate()
 	// Forward Pass: Forward plan the acceleration curve from the planned pointer onward.
 	// Also scans for optimal plan breakpoints and appropriately updates the planned pointer.
 	next = &block_buffer[block_buffer_planned]; // Begin at buffer planned pointer
-	block_index = plan_next_block_index(block_buffer_planned);
+	block_index = next_block_index(block_buffer_planned);
 	while (block_index != block_buffer_head) {
 		current = next;
 		next = &block_buffer[block_index];
@@ -154,7 +154,7 @@ static void planner_recalculate()
 		// buffer and a maximum entry speed or two maximum entry speeds, every block in between
 		// cannot logically be further improved. Hence, we don't have to recompute them anymore.
 		if (next->entry_speed_sqr == next->max_entry_speed_sqr) { block_buffer_planned = block_index; }
-		block_index = plan_next_block_index(block_index);
+		block_index = next_block_index(block_index);
 	}
 }
 
@@ -172,7 +172,7 @@ void Cplanner::reset()
 void Cplanner::discard_current_block()
 {
 	if (block_buffer_head != block_buffer_tail) { // Discard non-empty buffer.
-		uint8_t block_index = plan_next_block_index(block_buffer_tail);
+		uint8_t block_index = next_block_index(block_buffer_tail);
 		// Push block_buffer_planned pointer, if encountered.
 		if (block_buffer_tail == block_buffer_planned) { block_buffer_planned = block_index; }
 		block_buffer_tail = block_index;
@@ -189,7 +189,7 @@ plan_block_t *Cplanner::get_current_block()
 
 float Cplanner::get_exec_block_exit_speed()
 {
-	uint8_t block_index = plan_next_block_index(block_buffer_tail);
+	uint8_t block_index = next_block_index(block_buffer_tail);
 	if (block_index == block_buffer_head) { return(0.0); }
 	return(sqrt(block_buffer[block_index].entry_speed_sqr));
 }
@@ -262,15 +262,15 @@ void Cplanner::buffer_line(float *target, float feed_rate, uint8_t invert_feed_r
 			delta_mm = (target_steps[idx] - pl.position[idx]) / settings.steps_per_mm[idx];
 		}
 #else
-		target_steps[idx] = lround(target[idx] * settings.steps_per_mm[idx]);
+		target_steps[idx] = lround(target[idx] * Settings.settings.steps_per_mm[idx]);
 		block->steps[idx] = labs(target_steps[idx] - pl.position[idx]);
 		block->step_event_count = max(block->step_event_count, block->steps[idx]);
-		delta_mm = (target_steps[idx] - pl.position[idx]) / settings.steps_per_mm[idx];
+		delta_mm = (target_steps[idx] - pl.position[idx]) / Settings.settings.steps_per_mm[idx];
 #endif
 		unit_vec[idx] = delta_mm; // Store unit vector numerator. Denominator computed later.
 
 		// Set direction bits. Bit enabled always means direction is negative.
-		if (delta_mm < 0) { block->direction_bits |= get_direction_pin_mask(idx); }
+		if (delta_mm < 0) { block->direction_bits |= Settings.get_direction_pin_mask(idx); }
 
 		// Incrementally compute total move distance by Euclidean norm. First add square of each term.
 		block->millimeters += delta_mm*delta_mm;
@@ -299,8 +299,8 @@ void Cplanner::buffer_line(float *target, float feed_rate, uint8_t invert_feed_r
 			inverse_unit_vec_value = fabs(1.0 / unit_vec[idx]); // Inverse to remove multiple float divides.
 
 			// Check and limit feed rate against max individual axis velocities and accelerations
-			feed_rate = min(feed_rate, settings.max_rate[idx] * inverse_unit_vec_value);
-			block->acceleration = min(block->acceleration, settings.acceleration[idx] * inverse_unit_vec_value);
+			feed_rate = min(feed_rate, Settings.settings.max_rate[idx] * inverse_unit_vec_value);
+			block->acceleration = min(block->acceleration, Settings.settings.acceleration[idx] * inverse_unit_vec_value);
 
 			// Incrementally compute cosine of angle between previous and current path. Cos(theta) of the junction
 			// between the current move and the previous move is simply the dot product of the two unit vectors, 
@@ -353,7 +353,7 @@ void Cplanner::buffer_line(float *target, float feed_rate, uint8_t invert_feed_r
 			// TODO: Technically, the acceleration used in calculation needs to be limited by the minimum of the
 			// two junctions. However, this shouldn't be a significant problem except in extreme circumstances.
 			block->max_junction_speed_sqr = max(MINIMUM_JUNCTION_SPEED*MINIMUM_JUNCTION_SPEED,
-				(block->acceleration * settings.junction_deviation * sin_theta_d2) / (1.0 - sin_theta_d2));
+				(block->acceleration * Settings.settings.junction_deviation * sin_theta_d2) / (1.0 - sin_theta_d2));
 
 		}
 	}
@@ -374,10 +374,10 @@ void Cplanner::buffer_line(float *target, float feed_rate, uint8_t invert_feed_r
 
 	// New block is all set. Update buffer head and next buffer head indices.
 	block_buffer_head = next_buffer_head;
-	next_buffer_head = plan_next_block_index(block_buffer_head);
+	next_buffer_head = next_block_index(block_buffer_head);
 
 	// Finish up by recalculating the plan with the new block.
-	planner_recalculate();
+	recalculate();
 }
 
 
@@ -418,8 +418,8 @@ uint8_t Cplanner::get_block_buffer_count()
 void Cplanner::cycle_reinitialize()
 {
 	// Re-plan from a complete stop. Reset planner entry speeds and buffer planned pointer.
-	st_update_plan_block_parameters();
+	Stepper.st_update_plan_block_parameters();
 	block_buffer_planned = block_buffer_tail;
-	planner_recalculate();
+	recalculate();
 }
 
