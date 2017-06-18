@@ -105,6 +105,9 @@
     <ClInclude Include="defaults\defaults_generic.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="grbl_print.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AT24CX.cpp">
@@ -147,6 +150,18 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="probe.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="protocol.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="spindle_control.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="grbl_print.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="stepper.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

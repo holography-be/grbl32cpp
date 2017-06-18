@@ -14,7 +14,7 @@ public:
 	void off();
 	uint8_t get_state();
 	void set_power(float power);
-	uint8_t getpower();
+	uint8_t get_power();
 	void power_off();
 	void set_divisor(float powerdivisor);
 	float get_divisor();

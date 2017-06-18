@@ -28,7 +28,7 @@ THE SOFTWARE.
 #include <stdint.h>
 #include <inttypes.h>
 #include "Wire.h"
-//#include "Arduino.h"
+#include "Arduino.h"
 
 /**
  * Constructor with AT24Cx EEPROM at index 0

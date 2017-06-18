@@ -24,7 +24,7 @@ void Csettings::write_coord_data(uint8_t coord_select, float *coord_data)
 
 
 // Method to store Grbl global settings struct and version number into EEPROM
-void Csettings::global_settings()
+void Csettings::write_global_settings()
 {
 	//eeprom_put_char(0, SETTINGS_VERSION);
 	eeprom.memcpy_to_eeprom_with_checksum(EEPROM_ADDR_GLOBAL, (char*)&settings, sizeof(settings_t));
@@ -81,14 +81,14 @@ void Csettings::restore(uint8_t restore_flag) {
 
 	if (restore_flag & SETTINGS_RESTORE_STARTUP_LINES) {
 #if N_STARTUP_LINE > 0
-		eeprom.eeprom_put_char(EEPROM_ADDR_STARTUP_BLOCK, 0);
+		eeprom.put_char(EEPROM_ADDR_STARTUP_BLOCK, 0);
 #endif
 #if N_STARTUP_LINE > 1
-		eeprom.eeprom_put_char(EEPROM_ADDR_STARTUP_BLOCK + (LINE_BUFFER_SIZE + 1), 0);
+		eeprom.put_char(EEPROM_ADDR_STARTUP_BLOCK + (LINE_BUFFER_SIZE + 1), 0);
 #endif
 	}
 
-	if (restore_flag & SETTINGS_RESTORE_BUILD_INFO) { eeprom.eeprom_put_char(EEPROM_ADDR_BUILD_INFO, 0); }
+	if (restore_flag & SETTINGS_RESTORE_BUILD_INFO) {_ eeprom.put_char(EEPROM_ADDR_BUILD_INFO, 0); }
 }
 
 
@@ -134,7 +134,7 @@ uint8_t Csettings::read_coord_data(uint8_t coord_select, float *coord_data)
 
 
 // Reads Grbl global settings struct from EEPROM.
-uint8_t Csettings::global_settings() {
+uint8_t Csettings::read_global_settings() {
 	//// Check version-byte of eeprom
 	eeprom.memcpy_from_eeprom_with_checksum((char*)&settings, EEPROM_ADDR_GLOBAL, sizeof(settings_t));
 	return(true);
@@ -223,7 +223,7 @@ uint8_t Csettings::store_global_setting(uint8_t parameter, float value) {
 		case 21:
 			if (int_value) { settings.flags |= BITFLAG_HARD_LIMIT_ENABLE; }
 			else { settings.flags &= ~BITFLAG_HARD_LIMIT_ENABLE; }
-			limits_init(); // Re-init to immediately change. NOTE: Nice to have but could be problematic later.
+			Limits.init(); // Re-init to immediately change. NOTE: Nice to have but could be problematic later.
 			break;
 		case 22:
 			if (int_value) { settings.flags |= BITFLAG_HOMING_ENABLE; }
@@ -250,16 +250,16 @@ uint8_t Csettings::store_global_setting(uint8_t parameter, float value) {
 
 // Initialize the config subsystem
 void Csettings::init() {
-
+//	_eeprom = ref_eeprom;
 	if (!read_global_settings()) {
-		report_status_message(STATUS_SETTING_READ_FAIL);
-		settings_restore(SETTINGS_RESTORE_ALL); // Force restore all EEPROM data.
-		report_grbl_settings();
+		Report.status_message(STATUS_SETTING_READ_FAIL);
+		Settings.restore(SETTINGS_RESTORE_ALL); // Force restore all EEPROM data.
+		Report.grbl_settings();
 	}
 
 	// set laser power & debug mode to default value
-	settings.laser_power_divisor = DEFAULT_LASER_POWER_DIVISOR;
-	settings.debug_mode = DEFAULT_DEBUG_MODE;
+	Settings.settings.laser_power_divisor = DEFAULT_LASER_POWER_DIVISOR;
+	Settings.settings.debug_mode = DEFAULT_DEBUG_MODE;
 
 	// NOTE: Checking paramater data, startup lines, and build info string should be done here, 
 	// but it seems fairly redundant. Each of these can be manually checked and reset or restored.

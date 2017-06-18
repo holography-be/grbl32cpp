@@ -1,6 +1,5 @@
-char test;
-
 #include "gcode.h"
+
 
 #define MAX_LINE_NUMBER 9999999 
 
@@ -21,8 +20,8 @@ void Cgcode::gc_init()
 	memset(&gc_state, 0, sizeof(parser_state_t));
 
 	// Load default G54 coordinate system.
-	if (!(settings.read_coord_data(gc_state.modal.coord_select, gc_state.coord_system))) {
-		report.status_message(STATUS_SETTING_READ_FAIL);
+	if (!(Settings.read_coord_data(gc_state.modal.coord_select, gc_state.coord_system))) {
+		Report.status_message(STATUS_SETTING_READ_FAIL);
 	}
 	//printStringln("GC init");
 }
@@ -87,9 +86,9 @@ uint8_t Cgcode::gc_execute_line(char *line)
 	float value;
 	uint8_t int_value = 0;
 	uint16_t mantissa = 0;
-	if (settings.settings.debug_mode == DEBUG_MODE_ON) {
-		Serial.print("Lines:");
-		Serial.println(line);
+	if (Settings.settings.debug_mode == DEBUG_MODE_ON) {
+		//Serial.print("Lines:");
+		//Serial.println(line);
 	}
 	while (line[char_counter] != 0) { // Loop until no more g-code words in line.
 		// Import the next g-code word, expecting a letter followed by a value. Otherwise, error out.
@@ -294,11 +293,11 @@ uint8_t Cgcode::gc_execute_line(char *line)
 #endif
 				case 8:
 					gc_block.modal.coolant = LASER_ENABLE;
-					if (settings.settings.debug_mode == DEBUG_MODE_ON) Serial.println("laser on");
+					//if (Settings.settings.debug_mode == DEBUG_MODE_ON) Serial.println("laser on");
 					break;
 				case 9:
 					gc_block.modal.coolant = LASER_DISABLE;
-					if (settings.settings.debug_mode == DEBUG_MODE_ON) Serial.println("laser off");
+					//if (Settings.settings.debug_mode == DEBUG_MODE_ON) Serial.println("laser off");
 					break;
 				}
 				break;
@@ -334,8 +333,8 @@ uint8_t Cgcode::gc_execute_line(char *line)
 				// case 'Q': // Not supported
 			case 'R': word_bit = WORD_R; gc_block.values.r = value; break;
 			case 'S': word_bit = WORD_S; gc_block.values.s = value;
-				if (settings.settings.debug_mode == DEBUG_MODE_ON) {
-					Serial.println("set laser power");
+				if (Settings.settings.debug_mode == DEBUG_MODE_ON) {
+					//Serial.println("set laser power");
 				}
 				break;
 			case 'T': word_bit = WORD_T; break; // gc.values.t = int_value;
@@ -516,7 +515,7 @@ uint8_t Cgcode::gc_execute_line(char *line)
 	if (bit_istrue(command_words, bit(MODAL_GROUP_G12))) { // Check if called in block
 		if (gc_block.modal.coord_select > N_COORDINATE_SYSTEM) { FAIL(STATUS_GCODE_UNSUPPORTED_COORD_SYS); } // [Greater than N sys]
 		if (gc_state.modal.coord_select != gc_block.modal.coord_select) {
-			if (!(settings.read_coord_data(gc_block.modal.coord_select, coordinate_data))) { FAIL(STATUS_SETTING_READ_FAIL); }
+			if (!(Settings.read_coord_data(gc_block.modal.coord_select, coordinate_data))) { FAIL(STATUS_SETTING_READ_FAIL); }
 		}
 	}
 
@@ -549,7 +548,7 @@ uint8_t Cgcode::gc_execute_line(char *line)
 		// Determine coordinate system to change and try to load from EEPROM.
 		if (coord_select > 0) { coord_select--; } // Adjust P1-P6 index to EEPROM coordinate data indexing.
 		else { coord_select = gc_block.modal.coord_select; } // Index P0 as the active coordinate system
-		if (!settings.read_coord_data(coord_select, parameter_data)) { FAIL(STATUS_SETTING_READ_FAIL); } // [EEPROM read fail]
+		if (!Settings.read_coord_data(coord_select, parameter_data)) { FAIL(STATUS_SETTING_READ_FAIL); } // [EEPROM read fail]
 
 		// Pre-calculate the coordinate data changes. NOTE: Uses parameter_data since coordinate_data may be in use by G54-59.
 		for (idx = 0; idx<N_AXIS; idx++) { // Axes indices are consistent, so loop may be used.
@@ -620,13 +619,13 @@ uint8_t Cgcode::gc_execute_line(char *line)
 			// [G28 Errors]: Cutter compensation is enabled. 
 			// Retreive G28 go-home position data (in machine coordinates) from EEPROM
 			if (!axis_words) { axis_command = AXIS_COMMAND_NONE; } // Set to none if no intermediate motion.
-			if (!settings.read_coord_data(SETTING_INDEX_G28, parameter_data)) { FAIL(STATUS_SETTING_READ_FAIL); }
+			if (!Settings.read_coord_data(SETTING_INDEX_G28, parameter_data)) { FAIL(STATUS_SETTING_READ_FAIL); }
 			break;
 		case NON_MODAL_GO_HOME_1:
 			// [G30 Errors]: Cutter compensation is enabled. 
 			// Retreive G30 go-home position data (in machine coordinates) from EEPROM
 			if (!axis_words) { axis_command = AXIS_COMMAND_NONE; } // Set to none if no intermediate motion.
-			if (!settings.read_coord_data(SETTING_INDEX_G30, parameter_data)) { FAIL(STATUS_SETTING_READ_FAIL); }
+			if (!Settings.read_coord_data(SETTING_INDEX_G30, parameter_data)) { FAIL(STATUS_SETTING_READ_FAIL); }
 			break;
 		case NON_MODAL_SET_HOME_0: case NON_MODAL_SET_HOME_1:
 			// [G28.1/30.1 Errors]: Cutter compensation is enabled. 
@@ -840,8 +839,8 @@ uint8_t Cgcode::gc_execute_line(char *line)
 	need to update the state and execute the block according to the order-of-execution.
 	*/
 
-	if (settings.settings.debug_mode == DEBUG_MODE_ON) {
-		Serial.println("Execute line");
+	if (Settings.settings.debug_mode == DEBUG_MODE_ON) {
+		//Serial.println("Execute line");
 		//serial::write((char *)&(gc_block), sizeof(parser_block_t));
 	}
 
@@ -859,7 +858,7 @@ uint8_t Cgcode::gc_execute_line(char *line)
 	// [4. Set spindle speed ]:
 	if (gc_state.spindle_speed != gc_block.values.s) {
 		// Update running spindle only if not in check mode and not already enabled.
-		if (gc_state.modal.spindle != LASER_POWER_DISABLE) { spindle_run(gc_state.modal.spindle, gc_block.values.s); }
+		if (gc_state.modal.spindle != LASER_POWER_DISABLE) { Spindle.run(gc_state.modal.spindle, gc_block.values.s); }
 		gc_state.spindle_speed = gc_block.values.s;
 	}
 
@@ -871,13 +870,13 @@ uint8_t Cgcode::gc_execute_line(char *line)
 	// [7. Spindle control ]:
 	if (gc_state.modal.spindle != gc_block.modal.spindle) {
 		// Update spindle control and apply spindle speed when enabling it in this block.    
-		spindle_run(gc_block.modal.spindle, gc_state.spindle_speed);
+		Spindle.run(gc_block.modal.spindle, gc_state.spindle_speed);
 		gc_state.modal.spindle = gc_block.modal.spindle;
 	}
 
 	// [8. Coolant control ]:  
 	if (gc_state.modal.coolant != gc_block.modal.coolant) {
-		coolant.run(gc_block.modal.coolant);
+		Coolant.run(gc_block.modal.coolant);
 		gc_state.modal.coolant = gc_block.modal.coolant;
 	}
 
@@ -926,7 +925,7 @@ uint8_t Cgcode::gc_execute_line(char *line)
 	// [19. Go to predefined position, Set G10, or Set axis offsets ]:
 	switch (gc_block.non_modal_command) {
 	case NON_MODAL_SET_COORDINATE_DATA:
-		settings.write_coord_data(coord_select, parameter_data);
+		Settings.write_coord_data(coord_select, parameter_data);
 		// Update system coordinate system if currently active.
 		if (gc_state.modal.coord_select == coord_select) { memcpy(gc_state.coord_system, parameter_data, sizeof(parameter_data)); }
 		break;
@@ -948,10 +947,10 @@ uint8_t Cgcode::gc_execute_line(char *line)
 		memcpy(gc_state.position, parameter_data, sizeof(parameter_data));
 		break;
 	case NON_MODAL_SET_HOME_0:
-		settings.write_coord_data(SETTING_INDEX_G28, gc_state.position);
+		Settings.write_coord_data(SETTING_INDEX_G28, gc_state.position);
 		break;
 	case NON_MODAL_SET_HOME_1:
-		settings.write_coord_data(SETTING_INDEX_G30, gc_state.position);
+		Settings.write_coord_data(SETTING_INDEX_G30, gc_state.position);
 		break;
 	case NON_MODAL_SET_COORDINATE_OFFSET:
 		memcpy(gc_state.coord_offset, gc_block.values.xyz, sizeof(gc_block.values.xyz));
@@ -1044,11 +1043,11 @@ uint8_t Cgcode::gc_execute_line(char *line)
 	// refill and can only be resumed by the cycle start run-time command.
 	gc_state.modal.program_flow = gc_block.modal.program_flow;
 	if (gc_state.modal.program_flow) {
-		protocol_buffer_synchronize(); // Sync and finish all remaining buffered motions before moving on.
+		Protocol.buffer_synchronize(); // Sync and finish all remaining buffered motions before moving on.
 		if (gc_state.modal.program_flow == PROGRAM_FLOW_PAUSED) {
 			if (sys.state != STATE_CHECK_MODE) {
 				bit_true_atomic(System.sys_rt_exec_state, EXEC_FEED_HOLD); // Use feed hold for program pause.
-				protocol_execute_realtime(); // Execute suspend.
+				Protocol.execute_realtime(); // Execute suspend.
 			}
 		}
 		else { // == PROGRAM_FLOW_COMPLETED
@@ -1068,19 +1067,19 @@ uint8_t Cgcode::gc_execute_line(char *line)
 
 			// Execute coordinate change and spindle/coolant stop.
 			if (sys.state != STATE_CHECK_MODE) {
-				if (!(settings.read_coord_data(gc_state.modal.coord_select, coordinate_data))) { FAIL(STATUS_SETTING_READ_FAIL); }
+				if (!(Settings.read_coord_data(gc_state.modal.coord_select, coordinate_data))) { FAIL(STATUS_SETTING_READ_FAIL); }
 				memcpy(gc_state.coord_system, coordinate_data, sizeof(coordinate_data));
 				Laser.off();
 			}
 
-			report.feedback_message(MESSAGE_PROGRAM_END);
+			Report.feedback_message(MESSAGE_PROGRAM_END);
 		}
 		gc_state.modal.program_flow = PROGRAM_FLOW_RUNNING; // Reset program flow.
 	}
 
 	// TODO: % to denote start of program.
 
-	if (settings.settings.debug_mode == DEBUG_MODE_ON) {
+	if (Settings.settings.debug_mode == DEBUG_MODE_ON) {
 		//print::Stringln("Execute line");
 //    Serial.write("");
 		//serial::write((char *)&(gc_block), sizeof(parser_block_t));

@@ -30,6 +30,9 @@ class Climits {
 private:
 
 public:
+
+	volatile uint32_t old_limit_port_value = 0;
+	volatile uint32_t new_limit_port_value = 0;
 	// Initialize the limits module
 	void init();
 

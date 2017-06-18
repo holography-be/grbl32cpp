@@ -27,7 +27,7 @@ void Claser::on() {
 		LASER_ON_PORT->LATxSET.w |= (1 << LASER_ON_MASK);
 		LASER_FAN_PORT->LATxSET.w = LASER_FAN_MASK;
 		laser_state = LASER_STATE_ON;
-		led::on(LED_LASER);
+		Led.on(LED_LASER);
 	}
 }
 
@@ -36,7 +36,7 @@ void Claser::off() {
 		LASER_ON_PORT->LATxCLR.w = (1 << LASER_ON_MASK);
 		laser_state = LASER_STATE_OFF;
 		power_off();
-		led::off(LED_LASER);
+		Led.off(LED_LASER);
 	}
 }
 
@@ -58,7 +58,7 @@ void Claser::set_power(float power) {
 		TIMER_PWM->tmxCon.clr = TBCON_ON;
 		PWM->ocxCon.clr = OCCON_ON;
 		LASER_POWER_PORT->LATxCLR.w = LASER_POWER_MASK;
-		led::off(LED_LASER_POWER);
+		Led.off(LED_LASER_POWER);
 	}
 	else
 	{
@@ -78,7 +78,7 @@ void Claser::set_power(float power) {
 			TIMER_PWM->tmxTmr.reg = 0x0;
 			TIMER_PWM->tmxCon.set = TBCON_ON;
 		}
-		led::on(LED_LASER_POWER);
+		Led.on(LED_LASER_POWER);
 	}
 }
 

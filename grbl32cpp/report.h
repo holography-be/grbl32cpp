@@ -73,50 +73,50 @@
 #define MESSAGE_PROGRAM_END 7
 #define MESSAGE_RESTORE_DEFAULTS 8
 
-class report {
+class Creport {
 private:
 
 public:
 // Prints system status messages.
-	static void status_message(uint8_t status_code);
+	void status_message(uint8_t status_code);
 
 // Prints system alarm messages.
-	static void alarm_message(int8_t alarm_code);
+	void alarm_message(int8_t alarm_code);
 
 // Prints miscellaneous feedback messages.
-	static void feedback_message(uint8_t message_code);
+	void feedback_message(uint8_t message_code);
 
 // Prints welcome message
-	static void init_message();
+	void init_message();
 
 // Prints Grbl help and current global settings
-	static void grbl_help();
+	void grbl_help();
 
 // Prints Grbl global settings
-	static void grbl_settings();
+	void grbl_settings();
 
 // Prints an echo of the pre-parsed line received right before execution.
-	static void echo_line_received(char *line);
+	void echo_line_received(char *line);
 
 // Prints realtime status report
-	static void realtime_status();
+	void realtime_status();
 
 // Prints recorded probe position
-	static void probe_parameters();
+	void probe_parameters();
 
 // Prints Grbl NGC parameters (coordinate offsets, probe)
-	static void ngc_parameters();
+	void ngc_parameters();
 
 // Prints current g-code parser mode state
-	static void gcode_modes();
+	void gcode_modes();
 
 // Prints startup line
-	static void startup_line(uint8_t n, char *line);
+	void startup_line(uint8_t n, char *line);
 
 // Prints build info and user info
-	static void build_info(char *line);
+	void build_info(char *line);
 };
 
-
+extern Creport Report;
 
 #endif

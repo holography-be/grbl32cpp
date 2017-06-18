@@ -25,46 +25,47 @@ along with Grbl.  If not, see <http://www.gnu.org/licenses/>.
 #include "grbl.h"
 #include "HardwareSerial.h"
 
-class print {
+class Cprint {
 private:
 public:
-	static void String(const char *s);
+	void String(const char *s);
 
-	static void Stringln(const char *s);
+	void Stringln(const char *s);
 
-//void PgmString(const char *s);
+	void PgmString(const char *s);
 
-	static void Integer(long n);
+	void Integer(long n);
 
-	static void uint32_base10(uint32_t n);
+	void uint32_base10(uint32_t n);
 
 // Prints uint8 variable with base and number of desired digits.
-	static void unsigned_int8(uint8_t n, uint8_t base, uint8_t digits);
+	void unsigned_int8(uint8_t n, uint8_t base, uint8_t digits);
 
 // Prints an uint8 variable in base 2.
-	static void uint8_base2(uint8_t n);
+	void uint8_base2(uint8_t n);
 
 // Prints an uint8 variable in base 10.
-	static void uint8_base10(uint8_t n);
+	void uint8_base10(uint8_t n);
 
-	static void Float(float n, uint8_t decimal_places);
+	void Float(float n, uint8_t decimal_places);
 
 // Floating value printing handlers for special variables types used in Grbl. 
 //  - CoordValue: Handles all position or coordinate values in inches or mm reporting.
 //  - RateValue: Handles feed rate and current velocity in inches or mm reporting.
 //  - SettingValue: Handles all floating point settings values (always in mm.)
-	static void Float_CoordValue(float n);
+	void Float_CoordValue(float n);
 
-	static void Float_RateValue(float n);
+	void Float_RateValue(float n);
 
-	static void Float_SettingValue(float n);
+	void Float_SettingValue(float n);
 
 // Debug tool to print free memory in bytes at the called point. Not used otherwise.
-	static void FreeMemory();
+	void FreeMemory();
 
 
 };
 
+extern Cprint Print_grbl;
 
 
 #endif

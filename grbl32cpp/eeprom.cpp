@@ -1,8 +1,9 @@
+
 #include "eeprom.h"
 
 // global objetcs
 
-static AT24C32 _eeprom;
+
 
 /*! \brief  Read byte from EEPROM. */
 unsigned char Ceeprom::get_char(unsigned int addr)

@@ -112,6 +112,7 @@ private:
 
 public:
 	settings_t settings;
+	//Ceeprom _eeprom;
 // Initialize the configuration subsystem (load settings from EEPROM)
 	void init();
 
@@ -150,7 +151,7 @@ public:
 
 };
 
-extern Csettings settings;
+extern Csettings Settings;
 
 
 #endif

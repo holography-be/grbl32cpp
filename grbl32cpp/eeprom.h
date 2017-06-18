@@ -26,7 +26,7 @@ along with Grbl.  If not, see <http://www.gnu.org/licenses/>.
 class Ceeprom {
 
 private:
-
+	static AT24C32 _eeprom;
 public:
 
 	unsigned char get_char(unsigned int addr);

@@ -32,7 +32,7 @@ public:
 	void run(uint8_t mode);
 };
 
-extern Ccoolant coolant;
+extern Ccoolant Coolant;
 
 
 #endif

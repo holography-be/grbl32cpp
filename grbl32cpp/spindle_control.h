@@ -22,16 +22,24 @@
 #ifndef spindle_control_h
 #define spindle_control_h 
 
+#include "grbl.h"
 
+class Cspindle {
+private:
+public:
 // Initializes spindle pins and hardware PWM, if enabled.
-void spindle_init();
+void init();
 
 // Sets spindle direction and spindle rpm via PWM, if enabled.
-void spindle_run(uint8_t direction, float rpm);
+void run(uint8_t direction, float rpm);
 
-void spindle_set_state(uint8_t state, float rpm);
+void set_state(uint8_t state, float rpm);
 
 // Kills spindle.
 void spindle_stop();
+
+};
+
+extern Cspindle Spindle;
 
 #endif

@@ -1,4 +1,6 @@
 
+#include "motion_control.h"
+
 // Execute linear motion in absolute millimeter coordinates. Feed rate given in millimeters/second
 // unless invert_feed_rate is true. Then the feed_rate means that the motion should be completed in
 // (1 minute)/feed_rate time.
@@ -14,7 +16,7 @@ void Cmotion::mc_line(float *target, float feed_rate, uint8_t invert_feed_rate)
 {
 	// If enabled, check for soft limit violations. Placed here all line motions are picked up
 	// from everywhere in Grbl.
-	if (bit_istrue(settings.flags, BITFLAG_SOFT_LIMIT_ENABLE)) { limits_soft_check(target); }
+	if (bit_istrue(Settings.settings.flags, BITFLAG_SOFT_LIMIT_ENABLE)) { limits_soft_check(target); }
 
 	// If in check gcode mode, prevent motion by blocking planner. Soft limits still work.
 	if (sys.state == STATE_CHECK_MODE) { return; }

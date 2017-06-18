@@ -1,16 +1,16 @@
 #include "grbl_print.h"
 #include "HardwareSerial.h"
 
-void String(const char *s)
+void Cprint::String(const char *s)
 {
 	while (*s)
 		//serial::write(*s++);
 	Serial.write(*s);
 }
 
-void Stringln(const char *s) {
+void Cprint::Stringln(const char *s) {
 	while (*s) {
-		serial::write(*s++);
+		Serial.write(*s++);
 	}
 	String("\n\l");
 }
@@ -18,10 +18,10 @@ void Stringln(const char *s) {
 
 
 // Print a string stored in PGM-memory
-void PgmString(const char *s)
+void Cprint::PgmString(const char *s)
 {
 	while (*s)
-		serial::write(*s++);
+		Serial.write(*s++);
 }
 
 
@@ -48,7 +48,7 @@ void PgmString(const char *s)
 
 
 // Prints an uint8 variable with base and number of desired digits.
-void unsigned_int8(uint8_t n, uint8_t base, uint8_t digits)
+void Cprint::unsigned_int8(uint8_t n, uint8_t base, uint8_t digits)
 {
 	unsigned char buf[digits];
 	uint8_t i = 0;
@@ -59,31 +59,31 @@ void unsigned_int8(uint8_t n, uint8_t base, uint8_t digits)
 	}
 
 	for (; i > 0; i--)
-		serial::write('0' + buf[i - 1]);
+		Serial.write('0' + buf[i - 1]);
 }
 
 
 // Prints an uint8 variable in base 2.
-void uint8_base2(uint8_t n) {
-	print::unsigned_int8(n, 2, 8);
+void Cprint::uint8_base2(uint8_t n) {
+	unsigned_int8(n, 2, 8);
 }
 
 
 // Prints an uint8 variable in base 10.
-void uint8_base10(uint8_t n)
+void Cprint::uint8_base10(uint8_t n)
 {
 	uint8_t digits;
 	if (n < 10) { digits = 1; }
 	else if (n < 100) { digits = 2; }
 	else { digits = 3; }
-	print::unsigned_int8(n, 10, digits);
+	unsigned_int8(n, 10, digits);
 }
 
 
-void uint32_base10(uint32_t n)
+void Cprint::uint32_base10(uint32_t n)
 {
 	if (n == 0) {
-		serial::write('0');
+		Serial.write('0');
 		return;
 	}
 
@@ -96,18 +96,18 @@ void uint32_base10(uint32_t n)
 	}
 
 	for (; i > 0; i--)
-		serial::write('0' + buf[i - 1]);
+		Serial.write('0' + buf[i - 1]);
 }
 
 
-void Integer(long n)
+void Cprint::Integer(long n)
 {
 	if (n < 0) {
-		serial::write('-');
-		print::uint32_base10(-n);
+		Serial.write('-');
+		uint32_base10(-n);
 	}
 	else {
-		print::uint32_base10(n);
+		uint32_base10(n);
 	}
 }
 
@@ -117,10 +117,10 @@ void Integer(long n)
 // may be set by the user. The integer is then efficiently converted to a string.
 // NOTE: AVR '%' and '/' integer operations are very efficient. Bitshifting speed-up 
 // techniques are actually just slightly slower. Found this out the hard way.
-void Float(float n, uint8_t decimal_places)
+void Cprint::Float(float n, uint8_t decimal_places)
 {
 	if (n < 0) {
-		serial::write('-');
+		Serial.write('-');
 		n = -n;
 	}
 
@@ -152,7 +152,7 @@ void Float(float n, uint8_t decimal_places)
 
 	// Print the generated string.
 	for (; i > 0; i--)
-		serial::write(buf[i - 1]);
+		Serial.write(buf[i - 1]);
 }
 
 
@@ -161,25 +161,25 @@ void Float(float n, uint8_t decimal_places)
 //  - CoordValue: Handles all position or coordinate values in inches or mm reporting.
 //  - RateValue: Handles feed rate and current velocity in inches or mm reporting.
 //  - SettingValue: Handles all floating point settings values (always in mm.)
-void Float_CoordValue(float n) {
-	if (bit_istrue(setting::settings.flags, BITFLAG_REPORT_INCHES)) {
-		print::Float(n*INCH_PER_MM, N_DECIMAL_COORDVALUE_INCH);
+void Cprint::Float_CoordValue(float n) {
+	if (bit_istrue(Settings.settings.flags, BITFLAG_REPORT_INCHES)) {
+		Float(n*INCH_PER_MM, N_DECIMAL_COORDVALUE_INCH);
 	}
 	else {
-		print::Float(n, N_DECIMAL_COORDVALUE_MM);
+		Float(n, N_DECIMAL_COORDVALUE_MM);
 	}
 }
 
-void Float_RateValue(float n) {
-	if (bit_istrue(setting::settings.flags, BITFLAG_REPORT_INCHES)) {
-		print::Float(n*INCH_PER_MM, N_DECIMAL_RATEVALUE_INCH);
+void Cprint::Float_RateValue(float n) {
+	if (bit_istrue(Settings.settings.flags, BITFLAG_REPORT_INCHES)) {
+		Float(n*INCH_PER_MM, N_DECIMAL_RATEVALUE_INCH);
 	}
 	else {
-		print::Float(n, N_DECIMAL_RATEVALUE_MM);
+		Float(n, N_DECIMAL_RATEVALUE_MM);
 	}
 }
 
-void Float_SettingValue(float n) { print::Float(n, N_DECIMAL_SETTINGVALUE); }
+void Cprint::Float_SettingValue(float n) { Float(n, N_DECIMAL_SETTINGVALUE); }
 
 
 // Debug tool to print free memory in bytes at the called point. 
