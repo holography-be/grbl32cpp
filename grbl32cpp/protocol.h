@@ -22,6 +22,8 @@
 #ifndef protocol_h
 #define protocol_h
 
+#include "grbl.h"
+
 // Line buffer size from the serial input stream to be executed.
 // NOTE: Not a problem except for extreme cases, but the line buffer size can be too small
 // and g-code blocks can get truncated. Officially, the g-code standards support up to 256

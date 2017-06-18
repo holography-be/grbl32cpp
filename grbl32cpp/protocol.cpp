@@ -12,7 +12,7 @@
 // Directs and executes one line of formatted input from protocol_process. While mostly
 // incoming streaming g-code blocks, this also directs and executes Grbl internal commands,
 // such as settings, initiating the homing cycle, and toggling switch states.
-static void Cprotocol::protocol_execute_line(char *line)
+void Cprotocol::execute_line(char *line)
 {
 	//protocol_execute_realtime(); // Runtime command check point.
 	//if (sys.abort) { return; } // Bail to calling function upon system abort  
@@ -28,7 +28,7 @@ static void Cprotocol::protocol_execute_line(char *line)
 	}
 	else if (line[0] == '$') {
 		// Grbl '$' system command
-		Report.status_message(system_execute_line(line));
+		Report.status_message(System.execute_line(line));
 
 	}
 	else if (sys.state == STATE_ALARM) {
@@ -38,7 +38,7 @@ static void Cprotocol::protocol_execute_line(char *line)
 	}
 	else {
 		// Parse and execute g-code block!
-		Report.status_message(gc_execute_line(line));
+		Report.status_message(Gcode.gc_execute_line(line));
 	}
 }
 
@@ -57,7 +57,7 @@ void Cprotocol::main_loop()
 
 	// Check for and report alarm state after a reset, error, or an initial power up.
 	if (sys.state == STATE_ALARM) {
-		if (settings.settings.debug_mode == DEBUG_MODE_ON) {
+		if (Settings.settings.debug_mode == DEBUG_MODE_ON) {
 			Serial.println("Alarm");
 			for (;;){}
 		}
@@ -95,10 +95,10 @@ void Cprotocol::main_loop()
 		// With a better processor, it would be very easy to pull this initial parsing out as a 
 		// seperate task to be shared by the g-code parser and Grbl's system commands.
 
-		while ((c = serial_read()) != SERIAL_NO_DATA) {
+		while ((c = Serialbuffer.read()) != SERIAL_NO_DATA) {
 			if ((c == '\n') || (c == '\r')) { // End of line reached
 				line[char_counter] = 0; // Set string termination character.
-				protocol_execute_line(line); // Line is complete. Execute it!
+				Protocol.execute_line(line); // Line is complete. Execute it!
 				comment = COMMENT_NONE;
 				char_counter = 0;
 			}
@@ -157,9 +157,9 @@ void Cprotocol::main_loop()
 		// If there are no more characters in the serial read buffer to be processed and executed,
 		// this indicates that g-code streaming has either filled the planner buffer or has 
 		// completed. In either case, auto-cycle start, if enabled, any queued moves.
-		protocol_auto_cycle_start();
+		auto_cycle_start();
 
-		protocol_execute_realtime();  // Runtime command check point.
+		execute_realtime();  // Runtime command check point.
 		if (sys.abort) { return; } // Bail to main() program loop to reset system.
 
 	}
@@ -180,9 +180,9 @@ void Cprotocol::main_loop()
 // NOTE: The sys_rt_exec_state variable flags are set by any process, step or serial interrupts, pinouts,
 // limit switches, or the main program.
 void Cprotocol::execute_realtime() {
-	if (sys_rt_exec_state & EXEC_STATUS_REPORT) {
+	if (System.sys_rt_exec_state & EXEC_STATUS_REPORT) {
 		Report.realtime_status();
-		bit_false_atomic(sys_rt_exec_state, EXEC_STATUS_REPORT);
+		bit_false_atomic(System.sys_rt_exec_state, EXEC_STATUS_REPORT);
 	}
 }
 //	uint8_t rt_exec; // Temp variable to avoid calling volatile multiple times.
@@ -391,7 +391,7 @@ void Cprotocol::buffer_synchronize()
 	do {
 		execute_realtime();   // Check and execute run-time commands
 		if (sys.abort) { return; } // Check for system abort
-	} while (plan_get_current_block() || (sys.state == STATE_CYCLE));
+	} while (Planner.get_current_block() || (sys.state == STATE_CYCLE));
 }
 
 
@@ -406,5 +406,5 @@ void Cprotocol::buffer_synchronize()
 // when one of these conditions exist respectively: There are no more blocks sent (i.e. streaming 
 // is finished, single commands), a command that needs to wait for the motions in the buffer to 
 // execute calls a buffer sync, or the planner buffer is full and ready to go.
-void Cprotocol::auto_cycle_start() { bit_true_atomic(sys_rt_exec_state, EXEC_CYCLE_START); }
+void Cprotocol::auto_cycle_start() { bit_true_atomic(System.sys_rt_exec_state, EXEC_CYCLE_START); }
 

@@ -7,7 +7,7 @@ void Ccoolant::init()
 	LASER_ON_PORT->ODCxCLR.w = LASER_ON_MASK;
 	LASER_FAN_PORT->TRISxCLR.w = LASER_FAN_MASK;
 	LASER_FAN_PORT->ODCxCLR.w = LASER_FAN_MASK;
-	Coolant.stop();
+	stop();
 	//printStringln("Laser init");
 }
 
@@ -26,7 +26,7 @@ void Ccoolant::set_state(uint8_t mode)
 		Laser.on();
 	}
 	else {
-		Coolant.stop();
+		stop();
 	}
 }
 
@@ -35,6 +35,6 @@ void Ccoolant::run(uint8_t mode)
 	if (sys.state == STATE_CHECK_MODE) { return; }
 	// laser fan must be on immediately
 	Protocol.buffer_synchronize(); // Ensure coolant turns on when specified in program.  
-	Coolant.set_state(mode);
+	set_state(mode);
 }
 

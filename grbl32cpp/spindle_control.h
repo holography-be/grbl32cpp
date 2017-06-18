@@ -36,7 +36,7 @@ void run(uint8_t direction, float rpm);
 void set_state(uint8_t state, float rpm);
 
 // Kills spindle.
-void spindle_stop();
+void stop();
 
 };
 

@@ -12,51 +12,51 @@
 void Creport::status_message(uint8_t status_code)
 {
 	if (status_code == 0) { // STATUS_OK
-		printStringln("ok");
+		Print_grbl.Stringln("ok");
 	}
 	else {
-		printString("error: ");
+		Print_grbl.String("error: ");
 #ifdef REPORT_GUI_MODE
-		print_uint8_base10(status_code);
+		Print_grbl.uint8_base10(status_code);
 #else
 		switch (status_code) {
 		case STATUS_EXPECTED_COMMAND_LETTER:
-			printStringln("Expected command letter"); break;
+			Print_grbl.Stringln("Expected command letter"); break;
 		case STATUS_BAD_NUMBER_FORMAT:
-			printStringln("Bad number format"); break;
+			Print_grbl.Stringln("Bad number format"); break;
 		case STATUS_INVALID_STATEMENT:
-			printStringln("Invalid statement"); break;
+			Print_grbl.Stringln("Invalid statement"); break;
 		case STATUS_NEGATIVE_VALUE:
-			printStringln("Value < 0"); break;
+			Print_grbl.Stringln("Value < 0"); break;
 		case STATUS_SETTING_DISABLED:
-			printStringln("Setting disabled"); break;
+			Print_grbl.Stringln("Setting disabled"); break;
 		case STATUS_SETTING_STEP_PULSE_MIN:
-			printStringln("Value < 3 usec"); break;
+			Print_grbl.Stringln("Value < 3 usec"); break;
 		case STATUS_SETTING_READ_FAIL:
-			printStringln("EEPROM read fail. Using defaults"); break;
+			Print_grbl.Stringln("EEPROM read fail. Using defaults"); break;
 		case STATUS_IDLE_ERROR:
-			printStringln("Not idle"); break;
+			Print_grbl.Stringln("Not idle"); break;
 		case STATUS_ALARM_LOCK:
-			printStringln("Alarm lock"); break;
+			Print_grbl.Stringln("Alarm lock"); break;
 		case STATUS_SOFT_LIMIT_ERROR:
-			printStringln("Homing not enabled"); break;
+			Print_grbl.Stringln("Homing not enabled"); break;
 		case STATUS_OVERFLOW:
-			printStringln("Line overflow"); break;
+			Print_grbl.Stringln("Line overflow"); break;
 #ifdef MAX_STEP_RATE_HZ
 		case STATUS_MAX_STEP_RATE_EXCEEDED:
-			printStringln("Step rate > 30kHz"); break;
+			Print_grbl.Stringln("Step rate > 30kHz"); break;
 #endif      
 			// Common g-code parser errors.
 		case STATUS_GCODE_MODAL_GROUP_VIOLATION:
-			printStringln("Modal group violation"); break;
+			Print_grbl.Stringln("Modal group violation"); break;
 		case STATUS_GCODE_UNSUPPORTED_COMMAND:
-			printStringln("Unsupported command"); break;
+			Print_grbl.Stringln("Unsupported command"); break;
 		case STATUS_GCODE_UNDEFINED_FEED_RATE:
-			printStringln("Undefined feed rate"); break;
+			Print_grbl.Stringln("Undefined feed rate"); break;
 		default:
 			// Remaining g-code parser errors with error codes
-			printString("Invalid gcode ID:");
-			print_uint8_base10(status_code); // Print error code for user reference
+			Print_grbl.String("Invalid gcode ID:");
+			Print_grbl.uint8_base10(status_code); // Print error code for user reference
 		}
 #endif  
 
@@ -66,21 +66,21 @@ void Creport::status_message(uint8_t status_code)
 // Prints alarm messages.
 void Creport::alarm_message(int8_t alarm_code)
 {
-	printPgmString("ALARM: ");
+	Print_grbl.PgmString("ALARM: ");
 #ifdef REPORT_GUI_MODE
-	print_uint8_base10(alarm_code);
+	Print_grbl.uint8_base10(alarm_code);
 #else
 	switch (alarm_code) {
 	case ALARM_HARD_LIMIT_ERROR:
-		printStringln("Hard limit"); break;
+		Print_grbl.Stringln("Hard limit"); break;
 	case ALARM_SOFT_LIMIT_ERROR:
-		printStringln("Soft limit"); break;
+		Print_grbl.Stringln("Soft limit"); break;
 	case ALARM_ABORT_CYCLE:
-		printStringln("Abort during cycle"); break;
+		Print_grbl.Stringln("Abort during cycle"); break;
 	case ALARM_PROBE_FAIL:
-		printStringln("Probe fail"); break;
+		Print_grbl.Stringln("Probe fail"); break;
 	case ALARM_HOMING_FAIL:
-		printStringln("Homing fail"); break;
+		Print_grbl.Stringln("Homing fail"); break;
 	}
 #endif
 	delay_ms(500); // Force delay to ensure message clears serial write buffer.
@@ -94,39 +94,39 @@ void Creport::alarm_message(int8_t alarm_code)
 // TODO: Install silence feedback messages option in settings
 void Creport::feedback_message(uint8_t message_code)
 {
-	printPgmString("[");
+	Print_grbl.PgmString("[");
 	switch (message_code) {
 	case MESSAGE_CRITICAL_EVENT:
-		printPgmString("Reset to continue"); break;
+		Print_grbl.PgmString("Reset to continue"); break;
 	case MESSAGE_ALARM_LOCK:
-		printPgmString("'$H'|'$X' to unlock"); break;
+		Print_grbl.PgmString("'$H'|'$X' to unlock"); break;
 	case MESSAGE_ALARM_UNLOCK:
-		printPgmString("Caution: Unlocked"); break;
+		Print_grbl.PgmString("Caution: Unlocked"); break;
 	case MESSAGE_ENABLED:
-		printPgmString("Enabled"); break;
+		Print_grbl.PgmString("Enabled"); break;
 	case MESSAGE_DISABLED:
-		printPgmString("Disabled"); break;
+		Print_grbl.PgmString("Disabled"); break;
 	case MESSAGE_SAFETY_DOOR_AJAR:
-		printPgmString("Check Door"); break;
+		Print_grbl.PgmString("Check Door"); break;
 	case MESSAGE_PROGRAM_END:
-		printPgmString("Pgm End"); break;
+		Print_grbl.PgmString("Pgm End"); break;
 	case MESSAGE_RESTORE_DEFAULTS:
-		printPgmString("Restoring defaults"); break;
+		Print_grbl.PgmString("Restoring defaults"); break;
 	}
-	printStringln("]");
+	Print_grbl.Stringln("]");
 }
 
 
 // Welcome message
 void Creport::init_message()
 {
-	printStringln("\r\nGrbl Max " GRBL_VERSION " ['$' for help]");
+	Print_grbl.Stringln("\r\nGrbl Max " GRBL_VERSION " ['$' for help]");
 }
 
 // Grbl help message
-void Creport::report_grbl_help() {
+void Creport::grbl_help() {
 #ifndef REPORT_GUI_MODE
-	printPgmString("$$ (view Grbl settings)\r\n"
+	Print_grbl.PgmString("$$ (view Grbl settings)\r\n"
 		"$# (view # parameters)\r\n"
 		"$G (view parser state)\r\n"
 		"$I (view build info)\r\n"
@@ -149,55 +149,55 @@ void Creport::report_grbl_help() {
 void Creport::grbl_settings() {
 	// Print Grbl settings.
 #ifdef REPORT_GUI_MODE
-	printPgmString("$0="); print_uint8_base10(settings.pulse_microseconds);
-	printPgmString("\r\n$1="); print_uint8_base10(settings.stepper_idle_lock_time);
-	printPgmString("\r\n$2="); print_uint8_base10(settings.step_invert_mask);
-	printPgmString("\r\n$3="); print_uint8_base10(settings.dir_invert_mask);
-	printPgmString("\r\n$4="); print_uint8_base10(bit_istrue(settings.flags, BITFLAG_INVERT_ST_ENABLE));
-	printPgmString("\r\n$5="); print_uint8_base10(bit_istrue(settings.flags, BITFLAG_INVERT_LIMIT_PINS));
-	printPgmString("\r\n$6="); print_uint8_base10(bit_istrue(settings.flags, BITFLAG_INVERT_PROBE_PIN));
-	printPgmString("\r\n$10="); print_uint8_base10(settings.status_report_mask);
-	printPgmString("\r\n$11="); printFloat_SettingValue(settings.junction_deviation);
-	printPgmString("\r\n$12="); printFloat_SettingValue(settings.arc_tolerance);
-	printPgmString("\r\n$13="); print_uint8_base10(bit_istrue(settings.flags, BITFLAG_REPORT_INCHES));
-	printPgmString("\r\n$20="); print_uint8_base10(bit_istrue(settings.flags, BITFLAG_SOFT_LIMIT_ENABLE));
-	printPgmString("\r\n$21="); print_uint8_base10(bit_istrue(settings.flags, BITFLAG_HARD_LIMIT_ENABLE));
-	printPgmString("\r\n$22="); print_uint8_base10(bit_istrue(settings.flags, BITFLAG_HOMING_ENABLE));
-	printPgmString("\r\n$23="); print_uint8_base10(settings.homing_dir_mask);
-	printPgmString("\r\n$24="); printFloat_SettingValue(settings.homing_feed_rate);
-	printPgmString("\r\n$25="); printFloat_SettingValue(settings.homing_seek_rate);
-	printPgmString("\r\n$26="); print_uint8_base10(settings.homing_debounce_delay);
-	printPgmString("\r\n$27="); printFloat_SettingValue(settings.homing_pulloff);
-	printPgmString("\r\n$28="); print_uint8_base10(settings.laser_power_divisor);
-	printPgmString("\r\n$29="); print_uint8_base10(settings.debug_mode);
-	printPgmString("\r\n");
+	Print_grbl.PgmString("$0="); Print_grbl.uint8_base10(Settings.settings.pulse_microseconds);
+	Print_grbl.PgmString("\r\n$1="); Print_grbl.uint8_base10(Settings.settings.stepper_idle_lock_time);
+	Print_grbl.PgmString("\r\n$2="); Print_grbl.uint8_base10(Settings.settings.step_invert_mask);
+	Print_grbl.PgmString("\r\n$3="); Print_grbl.uint8_base10(Settings.settings.dir_invert_mask);
+	Print_grbl.PgmString("\r\n$4="); Print_grbl.uint8_base10(bit_istrue(Settings.settings.flags, BITFLAG_INVERT_ST_ENABLE));
+	Print_grbl.PgmString("\r\n$5="); Print_grbl.uint8_base10(bit_istrue(Settings.settings.flags, BITFLAG_INVERT_LIMIT_PINS));
+	Print_grbl.PgmString("\r\n$6="); Print_grbl.uint8_base10(bit_istrue(Settings.settings.flags, BITFLAG_INVERT_PROBE_PIN));
+	Print_grbl.PgmString("\r\n$10="); Print_grbl.uint8_base10(Settings.settings.status_report_mask);
+	Print_grbl.PgmString("\r\n$11="); Print_grbl.Float_SettingValue(Settings.settings.junction_deviation);
+	Print_grbl.PgmString("\r\n$12="); Print_grbl.Float_SettingValue(Settings.settings.arc_tolerance);
+	Print_grbl.PgmString("\r\n$13="); Print_grbl.uint8_base10(bit_istrue(Settings.settings.flags, BITFLAG_REPORT_INCHES));
+	Print_grbl.PgmString("\r\n$20="); Print_grbl.uint8_base10(bit_istrue(Settings.settings.flags, BITFLAG_SOFT_LIMIT_ENABLE));
+	Print_grbl.PgmString("\r\n$21="); Print_grbl.uint8_base10(bit_istrue(Settings.settings.flags, BITFLAG_HARD_LIMIT_ENABLE));
+	Print_grbl.PgmString("\r\n$22="); Print_grbl.uint8_base10(bit_istrue(Settings.settings.flags, BITFLAG_HOMING_ENABLE));
+	Print_grbl.PgmString("\r\n$23="); Print_grbl.uint8_base10(Settings.settings.homing_dir_mask);
+	Print_grbl.PgmString("\r\n$24="); Print_grbl.Float_SettingValue(Settings.settings.homing_feed_rate);
+	Print_grbl.PgmString("\r\n$25="); Print_grbl.Float_SettingValue(Settings.settings.homing_seek_rate);
+	Print_grbl.PgmString("\r\n$26="); Print_grbl.uint8_base10(Settings.settings.homing_debounce_delay);
+	Print_grbl.PgmString("\r\n$27="); Print_grbl.Float_SettingValue(Settings.settings.homing_pulloff);
+	Print_grbl.PgmString("\r\n$28="); Print_grbl.uint8_base10(Settings.settings.laser_power_divisor);
+	Print_grbl.PgmString("\r\n$29="); Print_grbl.uint8_base10(Settings.settings.debug_mode);
+	Print_grbl.PgmString("\r\n");
 #else      
-	printPgmString("$0="); print_uint8_base10(settings.pulse_microseconds);
-	printPgmString(" (step pulse, usec)\r\n$1="); print_uint8_base10(settings.stepper_idle_lock_time);
-	printPgmString(" (step idle delay, msec)\r\n$2="); print_uint8_base10(settings.step_invert_mask);
-	printPgmString(" (step port invert mask:"); print_uint8_base2(settings.step_invert_mask);
-	printPgmString(")\r\n$3="); print_uint8_base10(settings.dir_invert_mask);
-	printPgmString(" (dir port invert mask:"); print_uint8_base2(settings.dir_invert_mask);
-	printPgmString(")\r\n$4="); print_uint8_base10(bit_istrue(settings.flags, BITFLAG_INVERT_ST_ENABLE));
-	printPgmString(" (step enable invert, bool)\r\n$5="); print_uint8_base10(bit_istrue(settings.flags, BITFLAG_INVERT_LIMIT_PINS));
-	printPgmString(" (limit pins invert, bool)\r\n$6="); print_uint8_base10(bit_istrue(settings.flags, BITFLAG_INVERT_PROBE_PIN));
-	printPgmString(" (probe pin invert, bool)\r\n$10="); print_uint8_base10(settings.status_report_mask);
-	printPgmString(" (status report mask:"); print_uint8_base2(settings.status_report_mask);
-	printPgmString(")\r\n$11="); printFloat_SettingValue(settings.junction_deviation);
-	printPgmString(" (junction deviation, mm)\r\n$12="); printFloat_SettingValue(settings.arc_tolerance);
-	printPgmString(" (arc tolerance, mm)\r\n$13="); print_uint8_base10(bit_istrue(settings.flags, BITFLAG_REPORT_INCHES));
-	printPgmString(" (report inches, bool)\r\n$20="); print_uint8_base10(bit_istrue(settings.flags, BITFLAG_SOFT_LIMIT_ENABLE));
-	printPgmString(" (soft limits, bool)\r\n$21="); print_uint8_base10(bit_istrue(settings.flags, BITFLAG_HARD_LIMIT_ENABLE));
-	printPgmString(" (hard limits, bool)\r\n$22="); print_uint8_base10(bit_istrue(settings.flags, BITFLAG_HOMING_ENABLE));
-	printPgmString(" (homing cycle, bool)\r\n$23="); print_uint8_base10(settings.homing_dir_mask);
-	printPgmString(" (homing dir invert mask:"); print_uint8_base2(settings.homing_dir_mask);
-	printPgmString(")\r\n$24="); printFloat_SettingValue(settings.homing_feed_rate);
-	printPgmString(" (homing feed, mm/min)\r\n$25="); printFloat_SettingValue(settings.homing_seek_rate);
-	printPgmString(" (homing seek, mm/min)\r\n$26="); print_uint8_base10(settings.homing_debounce_delay);
-	printPgmString(" (homing debounce, msec)\r\n$27="); printFloat_SettingValue(settings.homing_pulloff);
-	printPgmString(" (homing pull-off, mm)\r\n$28="); print_uint8_base10(settings.laser_power_divisor);
-	printPgmString(" (laser power divisor)\r\n$29="); print_uint8_base10(settings.debug_mode);
-	printPgmString(" (debug mode)\r\n");
+	Print_grbl.PgmString("$0="); Print_grbl.uint8_base10(Settings.settings.pulse_microseconds);
+	Print_grbl.PgmString(" (step pulse, usec)\r\n$1="); Print_grbl.uint8_base10(Settings.settings.stepper_idle_lock_time);
+	Print_grbl.PgmString(" (step idle delay, msec)\r\n$2="); Print_grbl.uint8_base10(Settings.settings.step_invert_mask);
+	Print_grbl.PgmString(" (step port invert mask:"); Print_grbl.uint8_base2(Settings.settings.step_invert_mask);
+	Print_grbl.PgmString(")\r\n$3="); Print_grbl.uint8_base10(Settings.settings.dir_invert_mask);
+	Print_grbl.PgmString(" (dir port invert mask:"); Print_grbl.uint8_base2(Settings.settings.dir_invert_mask);
+	Print_grbl.PgmString(")\r\n$4="); Print_grbl.uint8_base10(bit_istrue(Settings.settings.flags, BITFLAG_INVERT_ST_ENABLE));
+	Print_grbl.PgmString(" (step enable invert, bool)\r\n$5="); Print_grbl.uint8_base10(bit_istrue(Settings.settings.flags, BITFLAG_INVERT_LIMIT_PINS));
+	Print_grbl.PgmString(" (limit pins invert, bool)\r\n$6="); Print_grbl.uint8_base10(bit_istrue(Settings.settings.flags, BITFLAG_INVERT_PROBE_PIN));
+	Print_grbl.PgmString(" (probe pin invert, bool)\r\n$10="); Print_grbl.uint8_base10(Settings.settings.status_report_mask);
+	Print_grbl.PgmString(" (status report mask:"); Print_grbl.uint8_base2(Settings.settings.status_report_mask);
+	Print_grbl.PgmString(")\r\n$11="); Print_grbl.Float_SettingValue(Settings.settings.junction_deviation);
+	Print_grbl.PgmString(" (junction deviation, mm)\r\n$12="); Print_grbl.Float_SettingValue(Settings.settings.arc_tolerance);
+	Print_grbl.PgmString(" (arc tolerance, mm)\r\n$13="); Print_grbl.uint8_base10(bit_istrue(Settings.settings.flags, BITFLAG_REPORT_INCHES));
+	Print_grbl.PgmString(" (report inches, bool)\r\n$20="); Print_grbl.uint8_base10(bit_istrue(Settings.settings.flags, BITFLAG_SOFT_LIMIT_ENABLE));
+	Print_grbl.PgmString(" (soft limits, bool)\r\n$21="); Print_grbl.uint8_base10(bit_istrue(Settings.settings.flags, BITFLAG_HARD_LIMIT_ENABLE));
+	Print_grbl.PgmString(" (hard limits, bool)\r\n$22="); Print_grbl.uint8_base10(bit_istrue(Settings.settings.flags, BITFLAG_HOMING_ENABLE));
+	Print_grbl.PgmString(" (homing cycle, bool)\r\n$23="); Print_grbl.uint8_base10(Settings.settings.homing_dir_mask);
+	Print_grbl.PgmString(" (homing dir invert mask:"); Print_grbl.uint8_base2(Settings.settings.homing_dir_mask);
+	Print_grbl.PgmString(")\r\n$24="); Print_grbl.Float_SettingValue(Settings.settings.homing_feed_rate);
+	Print_grbl.PgmString(" (homing feed, mm/min)\r\n$25="); Print_grbl.Float_SettingValue(Settings.settings.homing_seek_rate);
+	Print_grbl.PgmString(" (homing seek, mm/min)\r\n$26="); Print_grbl.uint8_base10(Settings.settings.homing_debounce_delay);
+	Print_grbl.PgmString(" (homing debounce, msec)\r\n$27="); Print_grbl.Float_SettingValue(Settings.settings.homing_pulloff);
+	Print_grbl.PgmString(" (homing pull-off, mm)\r\n$28="); Print_grbl.uint8_base10(Settings.settings.laser_power_divisor);
+	Print_grbl.PgmString(" (laser power divisor)\r\n$29="); Print_grbl.uint8_base10(Settings.settings.debug_mode);
+	Print_grbl.PgmString(" (debug mode)\r\n");
 #endif
 
 	// Print axis settings
@@ -205,31 +205,31 @@ void Creport::grbl_settings() {
 	uint8_t val = AXIS_SETTINGS_START_VAL;
 	for (set_idx = 0; set_idx<AXIS_N_SETTINGS; set_idx++) {
 		for (idx = 0; idx<N_AXIS; idx++) {
-			printPgmString("$");
-			print_uint8_base10(val + idx);
-			printPgmString("=");
+			Print_grbl.PgmString("$");
+			Print_grbl.uint8_base10(val + idx);
+			Print_grbl.PgmString("=");
 			switch (set_idx) {
-			case 0: printFloat_SettingValue(settings.steps_per_mm[idx]); break;
-			case 1: printFloat_SettingValue(settings.max_rate[idx]); break;
-			case 2: printFloat_SettingValue(settings.acceleration[idx] / (60 * 60)); break;
-			case 3: printFloat_SettingValue(-settings.max_travel[idx]); break;
+			case 0: Print_grbl.Float_SettingValue(Settings.settings.steps_per_mm[idx]); break;
+			case 1: Print_grbl.Float_SettingValue(Settings.settings.max_rate[idx]); break;
+			case 2: Print_grbl.Float_SettingValue(Settings.settings.acceleration[idx] / (60 * 60)); break;
+			case 3: Print_grbl.Float_SettingValue(-Settings.settings.max_travel[idx]); break;
 			}
 #ifdef REPORT_GUI_MODE
-			printStringln("");
+			Print_grbl.Stringln("");
 #else
-			printPgmString(" (");
+			Print_grbl.PgmString(" (");
 			switch (idx) {
-			case X_AXIS: printPgmString("x"); break;
-			case Y_AXIS: printPgmString("y"); break;
-			case Z_AXIS: printPgmString("z"); break;
+			case X_AXIS: Print_grbl.PgmString("x"); break;
+			case Y_AXIS: Print_grbl.PgmString("y"); break;
+			case Z_AXIS: Print_grbl.PgmString("z"); break;
 			}
 			switch (set_idx) {
-			case 0: printPgmString(", step/mm"); break;
-			case 1: printPgmString(" max rate, mm/min"); break;
-			case 2: printPgmString(" accel, mm/sec^2"); break;
-			case 3: printPgmString(" max travel, mm"); break;
+			case 0: Print_grbl.PgmString(", step/mm"); break;
+			case 1: Print_grbl.PgmString(" max rate, mm/min"); break;
+			case 2: Print_grbl.PgmString(" accel, mm/sec^2"); break;
+			case 3: Print_grbl.PgmString(" max travel, mm"); break;
 			}
-			printPgmString(")\r\n");
+			Print_grbl.PgmString(")\r\n");
 #endif
 		}
 		val += AXIS_SETTINGS_INCREMENT;
@@ -246,15 +246,15 @@ void Creport::probe_parameters()
 	float print_position[N_AXIS];
 
 	// Report in terms of machine position.
-	printPgmString("[PRB:");
+	Print_grbl.PgmString("[PRB:");
 	for (i = 0; i< N_AXIS; i++) {
-		print_position[i] = system_convert_axis_steps_to_mpos(sys.probe_position, i);
-		printFloat_CoordValue(print_position[i]);
-		if (i < (N_AXIS - 1)) { printPgmString(","); }
+		print_position[i] = System.convert_axis_steps_to_mpos(sys.probe_position, i);
+		Print_grbl.Float_CoordValue(print_position[i]);
+		if (i < (N_AXIS - 1)) { Print_grbl.PgmString(","); }
 	}
-	printPgmString(":");
-	print_uint8_base10(sys.probe_succeeded);
-	printStringln("]");
+	Print_grbl.PgmString(":");
+	Print_grbl.uint8_base10(sys.probe_succeeded);
+	Print_grbl.Stringln("]");
 }
 
 
@@ -264,119 +264,119 @@ void Creport::ngc_parameters()
 	float coord_data[N_AXIS];
 	uint8_t coord_select, i;
 	for (coord_select = 0; coord_select <= SETTING_INDEX_NCOORD; coord_select++) {
-		if (!(settings_read_coord_data(coord_select, coord_data))) {
-			report_status_message(STATUS_SETTING_READ_FAIL);
+		if (!(Settings.read_coord_data(coord_select, coord_data))) {
+			status_message(STATUS_SETTING_READ_FAIL);
 			return;
 		}
-		printPgmString("[G");
+		Print_grbl.PgmString("[G");
 		switch (coord_select) {
-		case 6: printPgmString("28"); break;
-		case 7: printPgmString("30"); break;
-		default: print_uint8_base10(coord_select + 54); break; // G54-G59
+		case 6: Print_grbl.PgmString("28"); break;
+		case 7: Print_grbl.PgmString("30"); break;
+		default: Print_grbl.uint8_base10(coord_select + 54); break; // G54-G59
 		}
-		printPgmString(":");
+		Print_grbl.PgmString(":");
 		for (i = 0; i<N_AXIS; i++) {
-			printFloat_CoordValue(coord_data[i]);
-			if (i < (N_AXIS - 1)) { printPgmString(","); }
-			else { printPgmString("]\r\n"); }
+			Print_grbl.Float_CoordValue(coord_data[i]);
+			if (i < (N_AXIS - 1)) { Print_grbl.PgmString(","); }
+			else { Print_grbl.PgmString("]\r\n"); }
 		}
 	}
-	printPgmString("[G92:"); // Print G92,G92.1 which are not persistent in memory
+	Print_grbl.PgmString("[G92:"); // Print G92,G92.1 which are not persistent in memory
 	for (i = 0; i<N_AXIS; i++) {
-		printFloat_CoordValue(gc_state.coord_offset[i]);
-		if (i < (N_AXIS - 1)) { printPgmString(","); }
-		else { printPgmString("]\r\n"); }
+		Print_grbl.Float_CoordValue(gc_state.coord_offset[i]);
+		if (i < (N_AXIS - 1)) { Print_grbl.PgmString(","); }
+		else { Print_grbl.PgmString("]\r\n"); }
 	}
-	printPgmString("[TLO:"); // Print tool length offset value
-	printFloat_CoordValue(gc_state.tool_length_offset);
-	printPgmString("]\r\n");
-	report_probe_parameters(); // Print probe parameters. Not persistent in memory.
+	Print_grbl.PgmString("[TLO:"); // Print tool length offset value
+	Print_grbl.Float_CoordValue(gc_state.tool_length_offset);
+	Print_grbl.PgmString("]\r\n");
+	probe_parameters(); // Print probe parameters. Not persistent in memory.
 }
 
 
 // Print current gcode parser mode state
 void Creport::gcode_modes()
 {
-	printPgmString("[");
+	Print_grbl.PgmString("[");
 
 	switch (gc_state.modal.motion) {
-	case MOTION_MODE_SEEK: printPgmString("G0"); break;
-	case MOTION_MODE_LINEAR: printPgmString("G1"); break;
-	case MOTION_MODE_CW_ARC: printPgmString("G2"); break;
-	case MOTION_MODE_CCW_ARC: printPgmString("G3"); break;
-	case MOTION_MODE_NONE: printPgmString("G80"); break;
+	case MOTION_MODE_SEEK: Print_grbl.PgmString("G0"); break;
+	case MOTION_MODE_LINEAR: Print_grbl.PgmString("G1"); break;
+	case MOTION_MODE_CW_ARC: Print_grbl.PgmString("G2"); break;
+	case MOTION_MODE_CCW_ARC: Print_grbl.PgmString("G3"); break;
+	case MOTION_MODE_NONE: Print_grbl.PgmString("G80"); break;
 	default:
-		printPgmString("G38.");
-		print_uint8_base10(gc_state.modal.motion - (MOTION_MODE_PROBE_TOWARD - 2));
+		Print_grbl.PgmString("G38.");
+		Print_grbl.uint8_base10(gc_state.modal.motion - (MOTION_MODE_PROBE_TOWARD - 2));
 	}
 
-	printPgmString(" G");
-	print_uint8_base10(gc_state.modal.coord_select + 54);
+	Print_grbl.PgmString(" G");
+	Print_grbl.uint8_base10(gc_state.modal.coord_select + 54);
 
 	switch (gc_state.modal.plane_select) {
-	case PLANE_SELECT_XY: printPgmString(" G17"); break;
-	case PLANE_SELECT_ZX: printPgmString(" G18"); break;
-	case PLANE_SELECT_YZ: printPgmString(" G19"); break;
+	case PLANE_SELECT_XY: Print_grbl.PgmString(" G17"); break;
+	case PLANE_SELECT_ZX: Print_grbl.PgmString(" G18"); break;
+	case PLANE_SELECT_YZ: Print_grbl.PgmString(" G19"); break;
 	}
 
-	if (gc_state.modal.units == UNITS_MODE_MM) { printPgmString(" G21"); }
-	else { printPgmString(" G20"); }
+	if (gc_state.modal.units == UNITS_MODE_MM) { Print_grbl.PgmString(" G21"); }
+	else { Print_grbl.PgmString(" G20"); }
 
-	if (gc_state.modal.distance == DISTANCE_MODE_ABSOLUTE) { printPgmString(" G90"); }
-	else { printPgmString(" G91"); }
+	if (gc_state.modal.distance == DISTANCE_MODE_ABSOLUTE) { Print_grbl.PgmString(" G90"); }
+	else { Print_grbl.PgmString(" G91"); }
 
-	if (gc_state.modal.feed_rate == FEED_RATE_MODE_INVERSE_TIME) { printPgmString(" G93"); }
-	else { printPgmString(" G94"); }
+	if (gc_state.modal.feed_rate == FEED_RATE_MODE_INVERSE_TIME) { Print_grbl.PgmString(" G93"); }
+	else { Print_grbl.PgmString(" G94"); }
 
 	switch (gc_state.modal.program_flow) {
-	case PROGRAM_FLOW_RUNNING: printPgmString(" M0"); break;
-	case PROGRAM_FLOW_PAUSED: printPgmString(" M1"); break;
-	case PROGRAM_FLOW_COMPLETED: printPgmString(" M2"); break;
+	case PROGRAM_FLOW_RUNNING: Print_grbl.PgmString(" M0"); break;
+	case PROGRAM_FLOW_PAUSED: Print_grbl.PgmString(" M1"); break;
+	case PROGRAM_FLOW_COMPLETED: Print_grbl.PgmString(" M2"); break;
 	}
 
 	switch (gc_state.modal.spindle) {
-	case LASER_POWER_ENABLE: printPgmString(" M3"); break;
-		//case LASER_POWER_ENABLE: printPgmString(" M4"); break;
-	case LASER_POWER_DISABLE: printPgmString(" M5"); break;
+	case LASER_POWER_ENABLE: Print_grbl.PgmString(" M3"); break;
+		//case LASER_POWER_ENABLE: Print_grbl.PgmString(" M4"); break;
+	case LASER_POWER_DISABLE: Print_grbl.PgmString(" M5"); break;
 	}
 
 	switch (gc_state.modal.coolant) {
-	case LASER_DISABLE: printPgmString(" M9"); break;
-	case LASER_ENABLE: printPgmString(" M8"); break;
+	case LASER_DISABLE: Print_grbl.PgmString(" M9"); break;
+	case LASER_ENABLE: Print_grbl.PgmString(" M8"); break;
 #ifdef ENABLE_M7
-	case COOLANT_MIST_ENABLE: printPgmString(" M7"); break;
+	case COOLANT_MIST_ENABLE: Print_grbl.PgmString(" M7"); break;
 #endif
 	}
 
-	printPgmString(" T");
-	print_uint8_base10(gc_state.tool);
+	Print_grbl.PgmString(" T");
+	Print_grbl.uint8_base10(gc_state.tool);
 
-	printPgmString(" F");
-	printFloat_RateValue(gc_state.feed_rate);
+	Print_grbl.PgmString(" F");
+	Print_grbl.Float_RateValue(gc_state.feed_rate);
 
 #ifdef VARIABLE_SPINDLE
-	printPgmString(" S");
-	printFloat_RateValue(gc_state.spindle_speed);
+	Print_grbl.PgmString(" S");
+	Print_grbl.Float_RateValue(gc_state.spindle_speed);
 #endif
 
-	printPgmString("]\r\n");
+	Print_grbl.PgmString("]\r\n");
 }
 
 // Prints specified startup line
 void Creport::startup_line(uint8_t n, char *line)
 {
-	printPgmString("$N"); print_uint8_base10(n);
-	printPgmString("="); printString(line);
-	printPgmString("\r\n");
+	Print_grbl.PgmString("$N"); Print_grbl.uint8_base10(n);
+	Print_grbl.PgmString("="); Print_grbl.String(line);
+	Print_grbl.PgmString("\r\n");
 }
 
 
 // Prints build info line
 void Creport::build_info(char *line)
 {
-	printPgmString("[" GRBL_VERSION "." GRBL_VERSION_BUILD ":");
-	printString(line);
-	printPgmString("]\r\n");
+	Print_grbl.PgmString("[" GRBL_VERSION "." GRBL_VERSION_BUILD ":");
+	Print_grbl.String(line);
+	Print_grbl.PgmString("]\r\n");
 }
 
 
@@ -384,8 +384,8 @@ void Creport::build_info(char *line)
 // and has been sent into protocol_execute_line() routine to be executed by Grbl.
 void Creport::echo_line_received(char *line)
 {
-	printPgmString("[echo: "); printString(line);
-	printPgmString("]\r\n");
+	Print_grbl.PgmString("[echo: "); Print_grbl.String(line);
+	Print_grbl.PgmString("]\r\n");
 }
 
 
@@ -407,80 +407,80 @@ void Creport::realtime_status()
 
 	// Report current machine state
 	switch (sys.state) {
-	case STATE_IDLE: printPgmString("<Idle"); break;
+	case STATE_IDLE: Print_grbl.PgmString("<Idle"); break;
 	case STATE_MOTION_CANCEL: // Report run state.
-	case STATE_CYCLE: printPgmString("<Run"); break;
-	case STATE_HOLD: printPgmString("<Hold"); break;
-	case STATE_HOMING: printPgmString("<Home"); break;
-	case STATE_ALARM: printPgmString("<Alarm"); break;
-	case STATE_CHECK_MODE: printPgmString("<Check"); break;
-	case STATE_SAFETY_DOOR: printPgmString("<Door"); break;
+	case STATE_CYCLE: Print_grbl.PgmString("<Run"); break;
+	case STATE_HOLD: Print_grbl.PgmString("<Hold"); break;
+	case STATE_HOMING: Print_grbl.PgmString("<Home"); break;
+	case STATE_ALARM: Print_grbl.PgmString("<Alarm"); break;
+	case STATE_CHECK_MODE: Print_grbl.PgmString("<Check"); break;
+	case STATE_SAFETY_DOOR: Print_grbl.PgmString("<Door"); break;
 	}
 
 	// If reporting a position, convert the current step count (current_position) to millimeters.
-	if (bit_istrue(settings.status_report_mask, (BITFLAG_RT_STATUS_MACHINE_POSITION | BITFLAG_RT_STATUS_WORK_POSITION))) {
-		system_convert_array_steps_to_mpos(print_position, current_position);
+	if (bit_istrue(Settings.settings.status_report_mask, (BITFLAG_RT_STATUS_MACHINE_POSITION | BITFLAG_RT_STATUS_WORK_POSITION))) {
+		System.convert_array_steps_to_mpos(print_position, current_position);
 	}
 
 	// Report machine position
-	if (bit_istrue(settings.status_report_mask, BITFLAG_RT_STATUS_MACHINE_POSITION)) {
-		printPgmString(",MPos:");
+	if (bit_istrue(Settings.settings.status_report_mask, BITFLAG_RT_STATUS_MACHINE_POSITION)) {
+		Print_grbl.PgmString(",MPos:");
 		for (idx = 0; idx< N_AXIS; idx++) {
-			printFloat_CoordValue(print_position[idx]);
-			if (idx < (N_AXIS - 1)) { printPgmString(","); }
+			Print_grbl.Float_CoordValue(print_position[idx]);
+			if (idx < (N_AXIS - 1)) { Print_grbl.PgmString(","); }
 		}
 	}
 
 	// Report work position
-	if (bit_istrue(settings.status_report_mask, BITFLAG_RT_STATUS_WORK_POSITION)) {
-		printPgmString(",WPos:");
+	if (bit_istrue(Settings.settings.status_report_mask, BITFLAG_RT_STATUS_WORK_POSITION)) {
+		Print_grbl.PgmString(",WPos:");
 		for (idx = 0; idx< N_AXIS; idx++) {
 			// Apply work coordinate offsets and tool length offset to current position.
 			print_position[idx] -= gc_state.coord_system[idx] + gc_state.coord_offset[idx];
 			if (idx == TOOL_LENGTH_OFFSET_AXIS) { print_position[idx] -= gc_state.tool_length_offset; }
-			printFloat_CoordValue(print_position[idx]);
-			if (idx < (N_AXIS - 1)) { printPgmString(","); }
+			Print_grbl.Float_CoordValue(print_position[idx]);
+			if (idx < (N_AXIS - 1)) { Print_grbl.PgmString(","); }
 		}
 	}
 
 	// Returns the number of active blocks are in the planner buffer.
-	if (bit_istrue(settings.status_report_mask, BITFLAG_RT_STATUS_PLANNER_BUFFER)) {
-		printPgmString(",Buf:");
-		print_uint8_base10(plan_get_block_buffer_count());
+	if (bit_istrue(Settings.settings.status_report_mask, BITFLAG_RT_STATUS_PLANNER_BUFFER)) {
+		Print_grbl.PgmString(",Buf:");
+		Print_grbl.uint8_base10(Planner.get_block_buffer_count());
 	}
 
 	// Report serial read buffer status
-	if (bit_istrue(settings.status_report_mask, BITFLAG_RT_STATUS_SERIAL_RX)) {
-		printPgmString(",RX:");
-		print_uint8_base10(serial_get_rx_buffer_count());
+	if (bit_istrue(Settings.settings.status_report_mask, BITFLAG_RT_STATUS_SERIAL_RX)) {
+		Print_grbl.PgmString(",RX:");
+		Print_grbl.uint8_base10(Serialbuffer.get_rx_buffer_count());
 	}
 
 #ifdef USE_LINE_NUMBERS
 	// Report current line number
-	printPgmString(",Ln:");
+	Print_grbl.PgmString(",Ln:");
 	int32_t ln = 0;
-	plan_block_t * pb = plan_get_current_block();
+	plan_block_t * pb = Planner.get_current_block();
 	if (pb != NULL) {
 		ln = pb->line_number;
 	}
-	printInteger(ln);
+	Print_grbl.Integer(ln);
 #endif
 
 #ifdef REPORT_REALTIME_RATE
 	// Report realtime rate 
-	printPgmString(",F:");
-	printFloat_RateValue(st_get_realtime_rate());
+	Print_grbl.PgmString(",F:");
+	Print_grbl.Float_RateValue(st_get_realtime_rate());
 #endif    
 
-	if (bit_istrue(settings.status_report_mask, BITFLAG_RT_STATUS_LIMIT_PINS)) {
-		printPgmString(",Lim:");
-		print_unsigned_int8(limits_get_state(), 2, N_AXIS);
+	if (bit_istrue(Settings.settings.status_report_mask, BITFLAG_RT_STATUS_LIMIT_PINS)) {
+		Print_grbl.PgmString(",Lim:");
+		Print_grbl.unsigned_int8(Limits.get_state(), 2, N_AXIS);
 	}
 
 #ifdef REPORT_CONTROL_PIN_STATE 
-	printPgmString(",Ctl:");
-	print_uint8_base2(CONTROL_PIN & CONTROL_MASK);
+	Print_grbl.PgmString(",Ctl:");
+	Print_grbl.uint8_base2(CONTROL_PIN & CONTROL_MASK);
 #endif
 
-	printStringln(">");
+	Print_grbl.Stringln(">");
 }

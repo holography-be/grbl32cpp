@@ -186,7 +186,7 @@ are shown and defined in the above illustration.
 void Cstepper::st_wake_up()
 {
 	// Enable stepper drivers.
-	if (bit_istrue(settings.flags, BITFLAG_INVERT_ST_ENABLE)) {
+	if (bit_istrue(Settings.settings.flags, BITFLAG_INVERT_ST_ENABLE)) {
 		ENABLE_MOTOR_PORT->LATxCLR.w = ENABLE_MOTOR_MASK;
 		//STEPPERS_DISABLE_PORT |= (1 << STEPPERS_DISABLE_BIT); 
 	}
@@ -200,15 +200,15 @@ void Cstepper::st_wake_up()
 		st.dir_outbits = dir_port_invert_mask;
 		st.step_outbits = step_port_invert_mask;
 
-		// Initialize step pulse timing from settings. Here to ensure updating after re-writing.
+		// Initialize step pulse timing from Settings.settings. Here to ensure updating after re-writing.
 #ifdef STEP_PULSE_DELAY
 		// Set total step pulse time after direction pin set. Ad hoc computation from oscilloscope.
-		st.step_pulse_time = -(((settings.pulse_microseconds + STEP_PULSE_DELAY - 2)*TICKS_PER_MICROSECOND) >> 3);
+		st.step_pulse_time = -(((Settings.settings.pulse_microseconds + STEP_PULSE_DELAY - 2)*TICKS_PER_MICROSECOND) >> 3);
 		// Set delay between direction pin write and step command.
-		OCR0A = -(((settings.pulse_microseconds)*TICKS_PER_MICROSECOND) >> 3);
+		OCR0A = -(((Settings.settings.pulse_microseconds)*TICKS_PER_MICROSECOND) >> 3);
 #else // Normal operation
 		// Set step pulse time. Ad hoc computation from oscilloscope. Uses two's complement.
-		st.step_pulse_time = -(((settings.pulse_microseconds - 2)*TICKS_PER_MICROSECOND) >> 3);
+		st.step_pulse_time = -(((Settings.settings.pulse_microseconds - 2)*TICKS_PER_MICROSECOND) >> 3);
 #endif
 
 		// Enable Stepper Driver Interrupt
@@ -230,13 +230,13 @@ void Cstepper::st_go_idle()
 
 	// Set stepper driver idle state, disabled or enabled, depending on settings and circumstances.
 	bool pin_state = false; // Keep enabled.
-	if (((settings.stepper_idle_lock_time != 0xff) || sys_rt_exec_alarm) && sys.state != STATE_HOMING) {
+	if (((Settings.settings.stepper_idle_lock_time != 0xff) || System.sys_rt_exec_alarm) && sys.state != STATE_HOMING) {
 		// Force stepper dwell to lock axes for a defined amount of time to ensure the axes come to a complete
 		// stop and not drift from residual inertial forces at the end of the last movement.
-		delay_ms(settings.stepper_idle_lock_time);
+		delay_ms(Settings.settings.stepper_idle_lock_time);
 		pin_state = true; // Override. Disable steppers.
 	}
-	if (bit_istrue(settings.flags, BITFLAG_INVERT_ST_ENABLE)) { pin_state = !pin_state; } // Apply pin invert.
+	if (bit_istrue(Settings.settings.flags, BITFLAG_INVERT_ST_ENABLE)) { pin_state = !pin_state; } // Apply pin invert.
 	if (pin_state == true) {
 		ENABLE_MOTOR_PORT->LATxINV.w = ENABLE_MOTOR_MASK;
 		//STEPPERS_DISABLE_PORT |= (1 << STEPPERS_DISABLE_BIT); 
@@ -297,7 +297,7 @@ NOTE: This ISR expects at least one step to be executed per segment.
 
 void __USER_ISR irq_stepper_timer() {
 
-	if (settings.debug_mode == DEBUG_MODE_ON) DEBUG_PORT->LATxSET.w = DEBUG_MASK; // Debug: Used to time ISR
+	if (Settings.settings.debug_mode == DEBUG_MODE_ON) DEBUG_PORT->LATxSET.w = DEBUG_MASK; // Debug: Used to time ISR
 	if (busy) { return; } // The busy-flag is used to avoid reentering this interrupt
 
 	// Set the direction pins a couple of nanoseconds before we step the steppers
@@ -316,7 +316,7 @@ void __USER_ISR irq_stepper_timer() {
 #endif  
 
 	// Enable step pulse reset timer so that The Stepper Port Reset Interrupt can reset the signal after
-	// exactly settings.pulse_microseconds microseconds, independent of the main Timer1 prescaler.
+	// exactly Settings.settings.pulse_microseconds microseconds, independent of the main Timer1 prescaler.
 	STEPPER_RESET_TIMER->tmxPr.set = st.step_pulse_time;
 	STEPPER_RESET_TIMER->tmxTmr.set = 0;
 	STEPPER_RESET_TIMER->tmxCon.set = TBCON_ON;
@@ -362,8 +362,8 @@ void __USER_ISR irq_stepper_timer() {
 		}
 		else {
 			// Segment buffer empty. Shutdown.
-			st_go_idle();
-			bit_true_atomic(sys_rt_exec_state, EXEC_CYCLE_STOP); // Flag main program for cycle end
+			Stepper.st_go_idle();
+			bit_true_atomic(System.sys_rt_exec_state, EXEC_CYCLE_STOP); // Flag main program for cycle end
 			return; // Nothing to do but exit.
 		}
 	}
@@ -440,17 +440,17 @@ cause issues at high step rates if another high frequency asynchronous interrupt
 added to Grbl.
 */
 // This interrupt is enabled by ISR_TIMER1_COMPAREA when it sets the motor port bits to execute
-// a step. This ISR resets the motor port after a short period (settings.pulse_microseconds) 
+// a step. This ISR resets the motor port after a short period (Settings.settings.pulse_microseconds) 
 // completing one step cycle.
 
 void __USER_ISR irq_stepper_reset_timer() {
 	// stepper pins off
-	if (settings.debug_mode == DEBUG_MODE_ON) DEBUG_PORT->LATxSET.w = DEBUG_MASK;
+	if (Settings.settings.debug_mode == DEBUG_MODE_ON) DEBUG_PORT->LATxSET.w = DEBUG_MASK;
 	STEP_PORT->LATxCLR.w = STEP_MASK;
 	STEPPER_RESET_TIMER->tmxCon.clr = TBCON_ON;	// disable timer
 	STEPPER_RESET_TIMER->tmxTmr.reg = 0x0;
 	clearIntFlag(STEPPER_RESET_IRQ);
-	if (settings.debug_mode == DEBUG_MODE_OFF) DEBUG_PORT->LATxCLR.w = DEBUG_MASK;
+	if (Settings.settings.debug_mode == DEBUG_MODE_OFF) DEBUG_PORT->LATxCLR.w = DEBUG_MASK;
 }
 
 //ISR(TIMER0_OVF_vect)
@@ -463,7 +463,7 @@ void __USER_ISR irq_stepper_reset_timer() {
 //#ifdef STEP_PULSE_DELAY
 //// This interrupt is used only when STEP_PULSE_DELAY is enabled. Here, the step pulse is
 //// initiated after the STEP_PULSE_DELAY time period has elapsed. The ISR TIMER2_OVF interrupt
-//// will then trigger after the appropriate settings.pulse_microseconds, as in normal operation.
+//// will then trigger after the appropriate Settings.settings.pulse_microseconds, as in normal operation.
 //// The new timing between direction, step pulse, and step complete events are setup in the
 //// st_wake_up() routine.
 //ISR(TIMER0_COMPA_vect)
@@ -480,8 +480,8 @@ void __USER_ISR irq_stepper_reset_timer() {
 //	step_port_invert_mask = 0;
 //	dir_port_invert_mask = 0;
 //	for (idx = 0; idx<N_AXIS; idx++) {
-//		if (bit_istrue(settings.step_invert_mask, bit(idx))) { step_port_invert_mask |= get_step_pin_mask(idx); }
-//		if (bit_istrue(settings.dir_invert_mask, bit(idx))) { dir_port_invert_mask |= get_direction_pin_mask(idx); }
+//		if (bit_istrue(Settings.settings.step_invert_mask, bit(idx))) { step_port_invert_mask |= get_step_pin_mask(idx); }
+//		if (bit_istrue(Settings.settings.dir_invert_mask, bit(idx))) { dir_port_invert_mask |= get_direction_pin_mask(idx); }
 //	}
 //}
 
@@ -546,7 +546,7 @@ void Cstepper::init()
 	clearIntFlag(STEPPER_RESET_IRQ);
 	setIntEnable(STEPPER_RESET_IRQ);
 
-	printStringln("Stepper init");
+	//printStringln("Stepper init");
 
 }
 
@@ -587,7 +587,7 @@ void Cstepper::st_prep_buffer()
 
 		// Determine if we need to load a new planner block or if the block has been replanned. 
 		if (pl_block == NULL) {
-			pl_block = plan_get_current_block(); // Query planner for a queued block
+			pl_block = Planner.get_current_block(); // Query planner for a queued block
 			if (pl_block == NULL) { return; } // No planner blocks. Exit.
 
 			// Check if the segment buffer completed the last planner block. If so, load the Bresenham
@@ -661,7 +661,7 @@ void Cstepper::st_prep_buffer()
 				// Compute or recompute velocity profile parameters of the prepped planner block.
 				prep.ramp_type = RAMP_ACCEL; // Initialize as acceleration ramp.
 				prep.accelerate_until = pl_block->millimeters;
-				prep.exit_speed = plan_get_exec_block_exit_speed();
+				prep.exit_speed = Planner.get_exec_block_exit_speed();
 				float exit_speed_sqr = prep.exit_speed*prep.exit_speed;
 				float intersect_distance =
 					0.5*(pl_block->millimeters + inv_2_accel*(pl_block->entry_speed_sqr - exit_speed_sqr));
@@ -817,7 +817,7 @@ void Cstepper::st_prep_buffer()
 				prep.dt_remainder = 0.0;
 				prep.steps_remaining = n_steps_remaining;
 				pl_block->millimeters = prep.steps_remaining / prep.step_per_mm; // Update with full steps.
-				plan_cycle_reinitialize();
+				Planner.cycle_reinitialize();
 				return; // Segment not generated, but current step data still retained.
 			}
 		}
@@ -891,13 +891,13 @@ void Cstepper::st_prep_buffer()
 				prep.dt_remainder = 0.0;
 				prep.steps_remaining = ceil(steps_remaining);
 				pl_block->millimeters = prep.steps_remaining / prep.step_per_mm; // Update with full steps.
-				plan_cycle_reinitialize();
+				Planner.cycle_reinitialize();
 				return; // Bail!
 			}
 			else { // End of planner block
 				// The planner block is complete. All steps are set to be executed in the segment buffer.
 				pl_block = NULL; // Set pointer to indicate check and load next planner block.
-				plan_discard_current_block();
+				Planner.discard_current_block();
 			}
 		}
 

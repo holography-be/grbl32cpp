@@ -36,27 +36,29 @@
 // This struct stores a linear movement of a g-code block motion with its critical "nominal" values
 // are as specified in the source g-code. 
 typedef struct {
-  // Fields used by the bresenham algorithm for tracing the line
-  // NOTE: Used by stepper algorithm to execute the block correctly. Do not alter these values.
-  uint8_t direction_bits;    // The direction bit set for this block (refers to *_DIRECTION_BIT in config.h)
-  uint32_t steps[N_AXIS];    // Step count along each axis
-  uint32_t step_event_count; // The maximum step axis count and number of steps required to complete this block. 
+	// Fields used by the bresenham algorithm for tracing the line
+	// NOTE: Used by stepper algorithm to execute the block correctly. Do not alter these values.
+	uint8_t direction_bits;    // The direction bit set for this block (refers to *_DIRECTION_BIT in config.h)
+	uint32_t steps[N_AXIS];    // Step count along each axis
+	uint32_t step_event_count; // The maximum step axis count and number of steps required to complete this block. 
 
-  // Fields used by the motion planner to manage acceleration
-  float entry_speed_sqr;         // The current planned entry speed at block junction in (mm/min)^2
-  float max_entry_speed_sqr;     // Maximum allowable entry speed based on the minimum of junction limit and 
-                                 //   neighboring nominal speeds with overrides in (mm/min)^2
-  float max_junction_speed_sqr;  // Junction entry speed limit based on direction vectors in (mm/min)^2
-  float nominal_speed_sqr;       // Axis-limit adjusted nominal speed for this block in (mm/min)^2
-  float acceleration;            // Axis-limit adjusted line acceleration in (mm/min^2)
-  float millimeters;             // The remaining distance for this block to be executed in (mm)
-  // uint8_t max_override;       // Maximum override value based on axis speed limits
+	// Fields used by the motion planner to manage acceleration
+	float entry_speed_sqr;         // The current planned entry speed at block junction in (mm/min)^2
+	float max_entry_speed_sqr;     // Maximum allowable entry speed based on the minimum of junction limit and 
+	//   neighboring nominal speeds with overrides in (mm/min)^2
+	float max_junction_speed_sqr;  // Junction entry speed limit based on direction vectors in (mm/min)^2
+	float nominal_speed_sqr;       // Axis-limit adjusted nominal speed for this block in (mm/min)^2
+	float acceleration;            // Axis-limit adjusted line acceleration in (mm/min^2)
+	float millimeters;             // The remaining distance for this block to be executed in (mm)
+	// uint8_t max_override;       // Maximum override value based on axis speed limits
 
-  #ifdef USE_LINE_NUMBERS
-    int32_t line_number;
-  #endif
+#ifdef USE_LINE_NUMBERS
+	int32_t line_number;
+#endif
 } plan_block_t;
 
+#define SOME_LARGE_VALUE 1.0E+38 // Used by rapids and acceleration maximization calculations. Just needs
+// to be larger than any feasible (mm/min)^2 or mm/sec^2 value.
 
 class Cplanner {
 private:

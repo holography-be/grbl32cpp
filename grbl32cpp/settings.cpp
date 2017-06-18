@@ -76,7 +76,7 @@ void Csettings::restore(uint8_t restore_flag) {
 		uint8_t idx;
 		float coord_data[N_AXIS];
 		memset(&coord_data, 0, sizeof(coord_data));
-		for (idx = 0; idx <= SETTING_INDEX_NCOORD; idx++) { settings_write_coord_data(idx, coord_data); }
+		for (idx = 0; idx <= SETTING_INDEX_NCOORD; idx++) { write_coord_data(idx, coord_data); }
 	}
 
 	if (restore_flag & SETTINGS_RESTORE_STARTUP_LINES) {
@@ -88,7 +88,7 @@ void Csettings::restore(uint8_t restore_flag) {
 #endif
 	}
 
-	if (restore_flag & SETTINGS_RESTORE_BUILD_INFO) {_ eeprom.put_char(EEPROM_ADDR_BUILD_INFO, 0); }
+	if (restore_flag & SETTINGS_RESTORE_BUILD_INFO) {eeprom.put_char(EEPROM_ADDR_BUILD_INFO, 0); }
 }
 
 
@@ -99,7 +99,7 @@ uint8_t Csettings::read_startup_line(uint8_t n, char *line)
 	if (!(eeprom.memcpy_from_eeprom_with_checksum((char*)line, addr, LINE_BUFFER_SIZE))) {
 		// Reset line with default value
 		line[0] = 0; // Empty line
-		this.store_startup_line(n, line);
+		store_startup_line(n, line);
 		return(false);
 	}
 	return(true);
@@ -112,7 +112,7 @@ uint8_t Csettings::read_build_info(char *line)
 	if (!(eeprom.memcpy_from_eeprom_with_checksum((char*)line, EEPROM_ADDR_BUILD_INFO, LINE_BUFFER_SIZE))) {
 		// Reset line with default value
 		line[0] = 0; // Empty line
-		this.store_build_info(line);
+		store_build_info(line);
 		return(false);
 	}
 	return(true);
@@ -126,7 +126,7 @@ uint8_t Csettings::read_coord_data(uint8_t coord_select, float *coord_data)
 	if (!(eeprom.memcpy_from_eeprom_with_checksum((char*)coord_data, addr, sizeof(float)*N_AXIS))) {
 		// Reset with default zero vector
 		clear_vector_float(coord_data);
-		this.write_coord_data(coord_select, coord_data);
+		write_coord_data(coord_select, coord_data);
 		return(false);
 	}
 	return(true);

@@ -121,6 +121,8 @@ public:
 
 // A helper method to set new settings from command line
 	uint8_t store_global_setting(uint8_t parameter, float value);
+  void write_global_settings();
+  uint8_t read_global_settings();
 
 // Stores the protocol line variable as a startup line in EEPROM
 	void store_startup_line(uint8_t n, char *line);

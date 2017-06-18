@@ -111,6 +111,8 @@ typedef struct {
 
 extern planner_t pl;
 
+
+
 extern uint8_t serial_rx_buffer[RX_BUFFER_SIZE];
 extern uint16_t serial_rx_buffer_head;
 extern volatile uint16_t serial_rx_buffer_tail;
@@ -178,7 +180,7 @@ extern volatile uint8_t busy;
 
 // Pointers for the step segment being prepped from the planner buffer. Accessed only by the
 // main program. Pointers may be planning segments or planner blocks ahead of what being executed.
-extern plan_block_t *pl_block;     // Pointer to the planner block being prepped
+//extern plan_block_t *pl_block;     // Pointer to the planner block being prepped
 extern st_block_t *st_prep_block;  // Pointer to the stepper block data being prepped 
 
 // Segment preparation data struct. Contains all the necessary information to compute new segments
@@ -202,6 +204,16 @@ typedef struct {
 	float decelerate_after; // Deceleration ramp start measured from end of block (mm)
 } st_prep_t;
 extern st_prep_t prep;
+
+// Line buffer size from the serial input stream to be executed.
+// NOTE: Not a problem except for extreme cases, but the line buffer size can be too small
+// and g-code blocks can get truncated. Officially, the g-code standards support up to 256
+// characters. In future versions, this will be increased, when we know how much extra
+// memory space we can invest into here or we re-write the g-code parser not to have this 
+// buffer.
+#ifndef LINE_BUFFER_SIZE
+#define LINE_BUFFER_SIZE 80
+#endif
 
 extern char line[LINE_BUFFER_SIZE]; // Line to be executed. Zero-terminated.
 

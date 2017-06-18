@@ -44,7 +44,7 @@
   #define XON_CHAR 0x11
 #endif
 
-class serial {
+class Cserialbuffer {
 private:
 public:
 
@@ -73,6 +73,7 @@ public:
 	virtual uint8_t get_tx_buffer_count();
 };
 
+extern Cserialbuffer Serialbuffer;
 
 
 #endif

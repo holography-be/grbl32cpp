@@ -1,7 +1,5 @@
 #include "probe.h"
 
-#ifndef _probe
-
 // Inverts the probe pin state depending on user settings and probing cycle mode.
 uint32_t probe_invert_mask;
 
@@ -20,7 +18,7 @@ void Cprobe::init()
 
 	// Pins et interrupt déjà définies dans system_init()
 
-	printStringln("Probe init");
+	//printStringln("Probe init");
 }
 
 
@@ -30,7 +28,7 @@ void Cprobe::init()
 void Cprobe::configure_invert_mask(uint8_t is_probe_away)
 {
 	probe_invert_mask = 0; // Initialize as zero.
-	if (bit_isfalse(settings.flags, BITFLAG_INVERT_PROBE_PIN)) { probe_invert_mask ^= Z_PROBE_BIT; }
+	if (bit_isfalse(Settings.settings.flags, BITFLAG_INVERT_PROBE_PIN)) { probe_invert_mask ^= Z_PROBE_BIT; }
 	if (is_probe_away) { probe_invert_mask ^= Z_PROBE_BIT; }
 }
 
